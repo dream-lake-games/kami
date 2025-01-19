@@ -12,11 +12,6 @@ pub enum MenuKind {
     Levels,
 }
 
-#[derive(Default, Resource)]
-struct UiState {
-    is_open: bool,
-}
-
 fn setup_egui_visuals(mut contexts: EguiContexts) {
     let ctx = contexts.ctx_mut();
     ctx.set_visuals(egui::Visuals {
@@ -65,7 +60,6 @@ pub(super) struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(MenuState::default());
-        app.insert_resource(UiState::default());
         app.add_systems(Startup, setup_egui_visuals);
 
         app.add_systems(OnEnter(MetaState::Menu), on_enter);

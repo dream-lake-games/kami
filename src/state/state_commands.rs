@@ -36,11 +36,25 @@ fn handle_load_level(
     mut next_meta_state: ResMut<NextState<MetaState>>,
 ) {
     let lid = trigger.lid.clone();
-    *level_state = LevelState { lid, paused: false };
+    *level_state = LevelState {
+        lid,
+        paused: false,
+        rect: default(),
+    };
     next_meta_state.set(MetaState::LevelLoading);
+}
+
+#[derive(Event)]
+pub struct StartLevel;
+fn handle_start_level(
+    _trigger: Trigger<StartLevel>,
+    mut next_meta_state: ResMut<NextState<MetaState>>,
+) {
+    next_meta_state.set(MetaState::Level);
 }
 
 pub(super) fn register_state_commands(app: &mut App) {
     app.add_observer(handle_load_menu);
     app.add_observer(handle_load_level);
+    app.add_observer(handle_start_level);
 }

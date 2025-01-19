@@ -4,6 +4,7 @@ mod consts;
 mod debug;
 mod level;
 mod menu;
+mod my_ldtk;
 mod root;
 mod scratch;
 mod state;
@@ -13,7 +14,7 @@ mod two_delight;
 /// be able to `use crate::prelude::*` and get everything I need at the top of files.
 #[expect(unused_imports)]
 mod prelude {
-    pub use super::{consts::*, level::*, menu::*, root::*, state::*, two_delight::*};
+    pub use super::{consts::*, level::*, menu::*, my_ldtk::*, root::*, state::*, two_delight::*};
     pub use bevy::{
         color::palettes::tailwind,
         ecs::component::StorageType,
@@ -51,6 +52,7 @@ fn main() {
     app.add_plugins((
         level::LevelPlugin,
         menu::MenuPlugin,
+        my_ldtk::MyLdtkPlugin,
         root::RootPlugin,
         // scratch::ScratchPlugin,
         state::StatePlugin,
