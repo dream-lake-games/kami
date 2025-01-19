@@ -1,0 +1,7 @@
+/target
+dist/
+
+# Ignoring since I usually footgun myself with git lfs
+assets/
+
+.DS_Store
