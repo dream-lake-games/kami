@@ -105,10 +105,10 @@ fn startup(mut commands: Commands, ass: Res<AssetServer>) {
         LightMan::new(Light64Anim::On),
     ));
 
-    commands.spawn(GroundBundle::new(
-        Pos::new(0.0, -SCREEN_VEC.y / 2.0),
-        UVec2::new(SCREEN_UVEC.x, 24),
-    ));
+    // commands.spawn(GroundBundle::new(
+    //     Pos::new(0.0, -SCREEN_VEC.y / 2.0),
+    //     UVec2::new(SCREEN_UVEC.x, 24),
+    // ));
     commands.spawn(GroundBundle::new(
         Pos::new(-SCREEN_VEC.x / 2.0, 0.0),
         UVec2::new(SCREEN_UVEC.x / 2, 12),
