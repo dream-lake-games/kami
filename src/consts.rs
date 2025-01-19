@@ -8,3 +8,8 @@ pub const OVERLAY_UVEC: UVec2 = UVec2::new(
     SCREEN_UVEC.y * OVERLAY_GROWTH,
 );
 pub const OVERLAY_VEC: Vec2 = Vec2::new(OVERLAY_UVEC.x as f32, OVERLAY_UVEC.y as f32);
+
+/// Root zixes
+pub const ZIX_MENU: i32 = 100;
+pub const ZIX_TRANSITION: i32 = 200;
+pub const ZIX_PAUSE: i32 = 180;

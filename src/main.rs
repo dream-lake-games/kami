@@ -2,14 +2,17 @@ use bevy::prelude::*;
 
 mod consts;
 mod debug;
+mod menu;
+mod root;
 mod scratch;
+mod state;
 mod two_delight;
 
 /// Idk if this is good practice for maintainability, but it definitely saves a lot of time to just
 /// be able to `use crate::prelude::*` and get everything I need at the top of files.
 #[expect(unused_imports)]
 mod prelude {
-    pub use super::{consts::*, two_delight::*};
+    pub use super::{consts::*, root::*, state::*, two_delight::*};
     pub use bevy::{
         color::palettes::tailwind,
         ecs::component::StorageType,
@@ -29,6 +32,7 @@ mod prelude {
     pub use bevy_ecs_ldtk::ldtk::FieldInstance;
     pub use bevy_ecs_ldtk::prelude::*;
     pub use bevy_ecs_tilemap::prelude::*;
+    pub use bevy_egui::{egui, EguiContexts};
     pub use bevy_pkv::PkvStore;
     pub use rand::prelude::SliceRandom;
     pub use rand::{thread_rng, Rng};
@@ -39,8 +43,16 @@ mod prelude {
 fn main() {
     let mut app = App::new();
 
+    // NOTE: Has to be first
     app.add_plugins(two_delight::TwoDelightPlugin);
-    app.add_plugins(scratch::ScratchPlugin);
+    app.add_plugins(bevy_egui::EguiPlugin);
+
+    app.add_plugins((
+        menu::MenuPlugin,
+        root::RootPlugin,
+        // scratch::ScratchPlugin,
+        state::StatePlugin,
+    ));
 
     #[cfg(debug_assertions)]
     {

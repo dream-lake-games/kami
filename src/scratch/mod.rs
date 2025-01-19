@@ -90,7 +90,7 @@ fn startup(mut commands: Commands, ass: Res<AssetServer>) {
         Player,
         Fly {
             ang: 0.0,
-            ang_vel: 0.0,
+            flap: None,
         },
         Sprite {
             custom_size: Some(player_hbox.get_size().as_vec2()),
@@ -105,10 +105,10 @@ fn startup(mut commands: Commands, ass: Res<AssetServer>) {
         LightMan::new(Light64Anim::On),
     ));
 
-    // commands.spawn(GroundBundle::new(
-    //     Pos::new(0.0, -SCREEN_VEC.y / 2.0),
-    //     UVec2::new(SCREEN_UVEC.x, 24),
-    // ));
+    commands.spawn(GroundBundle::new(
+        Pos::new(0.0, -SCREEN_VEC.y / 2.0),
+        UVec2::new(SCREEN_UVEC.x, 24),
+    ));
     commands.spawn(GroundBundle::new(
         Pos::new(-SCREEN_VEC.x / 2.0, 0.0),
         UVec2::new(SCREEN_UVEC.x / 2, 12),
@@ -224,17 +224,18 @@ fn shake_big_collisions(
 fn physics_update(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut bullet_time: ResMut<BulletTime>,
-    mut player_q: Query<&mut Pos, With<Player>>,
+    mut player_q: Query<(&mut Pos, &mut Dyno), With<Player>>,
 ) {
     // Maybe toggle bullet time
     if keyboard.just_pressed(KeyCode::Space) {
         let new_speed = bullet_time.get_base().rotated();
         bullet_time.set_base(new_speed);
     }
-    let mut pos = player_q.single_mut();
+    let (mut pos, mut dyno) = player_q.single_mut();
 
     if keyboard.just_pressed(KeyCode::Backspace) {
-        *pos = Pos::default();
+        *pos = Pos::new(0.0, -SCREEN_VEC.y / 2.0 + 10.0);
+        dyno.vel = Vec2::new(400.0, 0.0);
     }
 }
 

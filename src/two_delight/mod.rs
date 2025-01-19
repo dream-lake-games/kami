@@ -23,8 +23,7 @@ impl Plugin for TwoDelightPlugin {
                 resizable: true,
                 title: "Pirate Jam 16".to_string(),
                 resolution: bevy::window::WindowResolution::new(OVERLAY_VEC.x, OVERLAY_VEC.y),
-                // mode: bevy::window::WindowMode::Windowed,
-                mode: bevy::window::WindowMode::Fullscreen(MonitorSelection::Primary),
+                mode: bevy::window::WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
                 ..default()
             },
             asset_plugin: AssetPlugin {
