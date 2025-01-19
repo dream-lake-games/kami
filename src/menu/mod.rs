@@ -1,5 +1,17 @@
 use crate::prelude::*;
 
+#[derive(Resource, Debug, Default, Reflect)]
+pub struct MenuState {
+    pub kind: MenuKind,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Reflect, Default)]
+pub enum MenuKind {
+    #[default]
+    Title,
+    Levels,
+}
+
 #[derive(Default, Resource)]
 struct UiState {
     is_open: bool,
@@ -13,7 +25,7 @@ fn setup_egui_visuals(mut contexts: EguiContexts) {
     });
 }
 
-fn menu_ui(mut contexts: EguiContexts, mut menu_state: ResMut<MenuState>) {
+fn menu_ui(mut contexts: EguiContexts, mut menu_state: ResMut<MenuState>, mut commands: Commands) {
     let ctx = contexts.ctx_mut();
 
     match menu_state.kind {
@@ -21,13 +33,9 @@ fn menu_ui(mut contexts: EguiContexts, mut menu_state: ResMut<MenuState>) {
             egui::CentralPanel::default()
                 .frame(egui::Frame::none())
                 .show(ctx, |ui| {
-                    ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                        if ui.button("Play").clicked() {
-                            println!("play");
+                    ui.vertical_centered(|ui| {
+                        if ui.button("PLAY").clicked() {
                             menu_state.kind = MenuKind::Levels;
-                        }
-                        if ui.button("Settings").clicked() {
-                            println!("Settings");
                         }
                     });
                 });
@@ -36,7 +44,10 @@ fn menu_ui(mut contexts: EguiContexts, mut menu_state: ResMut<MenuState>) {
             egui::CentralPanel::default()
                 .frame(egui::Frame::none())
                 .show(ctx, |ui| {
-                    ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                    ui.vertical_centered(|ui| {
+                        if ui.button("SCRATCH").clicked() {
+                            commands.trigger(LoadLevel::lid("bad_lid"));
+                        }
                         if ui.button("BACK").clicked() {
                             menu_state.kind = MenuKind::Title;
                         }
@@ -46,17 +57,14 @@ fn menu_ui(mut contexts: EguiContexts, mut menu_state: ResMut<MenuState>) {
     }
 }
 
-fn on_enter(mut commands: Commands) {
-    commands.insert_resource(MenuState::default());
-}
+fn on_enter() {}
 
-fn on_exit(mut commands: Commands) {
-    commands.remove_resource::<MenuState>();
-}
+fn on_exit() {}
 
 pub(super) struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
+        app.insert_resource(MenuState::default());
         app.insert_resource(UiState::default());
         app.add_systems(Startup, setup_egui_visuals);
 

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 mod consts;
 mod debug;
+mod level;
 mod menu;
 mod root;
 mod scratch;
@@ -12,7 +13,7 @@ mod two_delight;
 /// be able to `use crate::prelude::*` and get everything I need at the top of files.
 #[expect(unused_imports)]
 mod prelude {
-    pub use super::{consts::*, root::*, state::*, two_delight::*};
+    pub use super::{consts::*, level::*, menu::*, root::*, state::*, two_delight::*};
     pub use bevy::{
         color::palettes::tailwind,
         ecs::component::StorageType,
@@ -48,6 +49,7 @@ fn main() {
     app.add_plugins(bevy_egui::EguiPlugin);
 
     app.add_plugins((
+        level::LevelPlugin,
         menu::MenuPlugin,
         root::RootPlugin,
         // scratch::ScratchPlugin,
