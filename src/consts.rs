@@ -9,6 +9,13 @@ pub const OVERLAY_UVEC: UVec2 = UVec2::new(
 );
 pub const OVERLAY_VEC: Vec2 = Vec2::new(OVERLAY_UVEC.x as f32, OVERLAY_UVEC.y as f32);
 
+/// Gameplay zixes
+pub const ZIX_CHEF: f32 = 50.0;
+
+/// Marked hboxes (hacking and totally arbitrary bc I forgot which (if any) numbers have special meaning whoops)
+pub const HBOX_DIRT: HBoxMarker = 8;
+pub const HBOX_SMOOTH: HBoxMarker = 9;
+
 /// Root zixes
 pub const ZIX_MENU: i32 = 100;
 pub const ZIX_TRANSITION: i32 = 200;

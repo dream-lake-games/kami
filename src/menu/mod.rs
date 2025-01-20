@@ -41,7 +41,8 @@ fn menu_ui(mut contexts: EguiContexts, mut menu_state: ResMut<MenuState>, mut co
                 .show(ctx, |ui| {
                     ui.vertical_centered(|ui| {
                         if ui.button("SCRATCH").clicked() {
-                            commands.trigger(LoadLevel::lid("bad_lid"));
+                            commands
+                                .trigger(LoadLevel::lid("6dab9440-c210-11ef-ab00-79b1690c4bfe"));
                         }
                         if ui.button("BACK").clicked() {
                             menu_state.kind = MenuKind::Title;

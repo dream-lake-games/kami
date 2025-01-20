@@ -1,8 +1,8 @@
 use crate::{debug::debug_resource, prelude::*};
 
-mod state_commands;
+mod state_triggers;
 
-pub use state_commands::*;
+pub use state_triggers::*;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Reflect, States)]
 pub enum MetaState {
@@ -23,7 +23,7 @@ impl Plugin for StatePlugin {
 
         app.insert_state(MetaState::Setup);
 
-        state_commands::register_state_commands(app);
+        state_triggers::register_state_commands(app);
 
         debug_resource!(app, State<MetaState>);
     }

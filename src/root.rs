@@ -140,14 +140,15 @@ macro_rules! impl_subroot_init {
 }
 
 impl_root_init!(
+    CameraRoot,
+    DebugRoot,
+    GamepadRoot,
     LayerRoot,
     LevelRoot,
     MenuRoot(ZIX_MENU),
-    TransitionRoot(ZIX_TRANSITION),
     ObserveRoot,
     SoundRoot,
-    DebugRoot,
-    GamepadRoot,
+    TransitionRoot(ZIX_TRANSITION),
 );
 
 impl_subroot_init!(

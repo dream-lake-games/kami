@@ -51,7 +51,6 @@ fn handle_setup_bg(
 ) {
     let kind = trigger.kind.clone();
     // Wait some ticks before saying were done
-    commands.spawn(BlockMyLdtkLoad::ticks(30));
     match kind {
         BgKind::Sky => {
             let sprite = Sprite {
@@ -65,7 +64,9 @@ fn handle_setup_bg(
                 ..default()
             };
             let bundle = BgParallaxBundle::new("Sky", sprite, 0.3);
-            commands.spawn(bundle).set_parent(root.eid());
+            commands
+                .spawn((bundle, BlockMyLdtkLoad::ticks(30)))
+                .set_parent(root.eid());
         }
     }
 }

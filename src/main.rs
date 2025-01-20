@@ -4,6 +4,8 @@ mod anim;
 mod bg;
 mod consts;
 mod debug;
+mod gameplay;
+mod input;
 mod level;
 mod menu;
 mod my_ldtk;
@@ -17,7 +19,8 @@ mod two_delight;
 #[expect(unused_imports)]
 mod prelude {
     pub use super::{
-        anim::*, bg::*, consts::*, level::*, menu::*, my_ldtk::*, root::*, state::*, two_delight::*,
+        anim::*, bg::*, consts::*, gameplay::*, input::*, level::*, menu::*, my_ldtk::*, root::*,
+        state::*, two_delight::*,
     };
     pub use bevy::{
         color::palettes::tailwind,
@@ -59,6 +62,8 @@ fn main() {
     app.add_plugins((
         anim::BonusAnimPlugin,
         bg::BgPlugin,
+        gameplay::GameplayPlugin,
+        input::InputPlugin,
         level::LevelPlugin,
         menu::MenuPlugin,
         my_ldtk::MyLdtkPlugin,

@@ -1,3 +1,8 @@
+//! This shit is awesome.
+//! It doesn't work on WASM tho :(
+
+#![expect(dead_code)]
+
 use crate::prelude::*;
 
 #[doc(hidden)]
@@ -16,6 +21,7 @@ macro_rules! defn_anim {
             #[expect(nonstandard_style)]
             pub(crate) fn [<_wizardry_for_$name>](app: &mut App) {
                 app.add_plugins(AnimDefnPlugin::<$name, AnimTimeRes>::default());
+                panic!("adding some plugin....");
             }
             inventory::submit! {
                 _AnimWizardry { do_register: [<_wizardry_for_ $name>] }

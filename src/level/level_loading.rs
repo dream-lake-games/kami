@@ -28,7 +28,31 @@ fn setup(mut commands: Commands, root: Res<TransitionRoot>) {
         .set_parent(root.eid());
 }
 
+#[derive(Event)]
+pub struct DespawnLevel;
+fn handle_despawn_level(
+    _trigger: Trigger<DespawnLevel>,
+    mut commands: Commands,
+    level_active_root: Res<LevelActiveRoot>,
+    level_bg_root: Res<LevelBgRoot>,
+    level_detail_root: Res<LevelDetailRoot>,
+    level_meta_root: Res<LevelMetaRoot>,
+    level_platform_root: Res<LevelPlatformRoot>,
+) {
+    for eid in [
+        level_active_root.eid(),
+        level_bg_root.eid(),
+        level_detail_root.eid(),
+        level_meta_root.eid(),
+        level_platform_root.eid(),
+    ] {
+        commands.entity(eid).despawn_descendants();
+    }
+}
+
 fn on_enter_loading(mut commands: Commands, mut loading: Query<&mut AnimMan<LoadingAnim>>) {
+    commands.trigger(DespawnLevel);
+    commands.trigger(UnloadMyLdtkLevel);
     commands.trigger(LoadMyLdtkLevel::new(
         "worlds/base.ldtk",
         "6dab9440-c210-11ef-ab00-79b1690c4bfe",
@@ -49,6 +73,8 @@ fn on_exit_loading(mut loading: Query<&mut AnimMan<LoadingAnim>>) {
 
 pub(super) fn register_level_loading(app: &mut App) {
     app.add_plugins(MyLdtkEntityPlugin::<LevelMeta>::new("Meta", "LevelMeta"));
+
+    app.add_observer(handle_despawn_level);
 
     app.add_systems(OnEnter(MetaState::Setup), setup.after(RootInit));
 

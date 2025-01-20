@@ -2,12 +2,13 @@ use crate::prelude::*;
 
 #[derive(std::hash::Hash, Debug, Clone)]
 pub enum TriggerRxKind {
-    Player,
+    Chef,
 }
 impl TriggerKind for TriggerRxKind {}
 
 #[derive(std::hash::Hash, Debug, Clone, PartialEq, Eq)]
 pub enum TriggerTxKind {
+    Chef,
     Spikes,
 }
 impl TriggerKind for TriggerTxKind {}

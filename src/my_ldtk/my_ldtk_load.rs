@@ -22,9 +22,9 @@ impl LoadMyLdtkLevel {
     }
 }
 #[derive(Event)]
-pub struct UnloadMyLdtk;
+pub struct UnloadMyLdtkLevel;
 
-fn handle_start_my_ldtk_load(
+fn handle_load_my_ldtk_level(
     trigger: Trigger<LoadMyLdtkLevel>,
     mut commands: Commands,
     ass: Res<AssetServer>,
@@ -44,13 +44,13 @@ fn handle_start_my_ldtk_load(
     *my_ldtk_load_state = MyLdtkLoadState::Loading;
 }
 
-fn handle_unload_my_ldtk(
-    _trigger: Trigger<UnloadMyLdtk>,
+fn handle_unload_my_ldtk_level(
+    _trigger: Trigger<UnloadMyLdtkLevel>,
     mut commands: Commands,
-    existing_root: Query<Entity, With<LdtkProjectHandle>>,
+    existing_root: Query<(Entity, &LdtkProjectHandle)>,
     mut my_ldtk_load_state: ResMut<MyLdtkLoadState>,
 ) {
-    for eid in &existing_root {
+    for (eid, _hand) in &existing_root {
         commands.entity(eid).despawn_recursive();
     }
     *my_ldtk_load_state = MyLdtkLoadState::Unloaded;
@@ -75,7 +75,6 @@ fn handle_loading(
     mut commands: Commands,
     mut blockers: Query<(Entity, &mut BlockMyLdtkLoad)>,
     mut my_ldtk_load_state: ResMut<MyLdtkLoadState>,
-    // level_state_q: Query,
 ) {
     // Check for explicit blockers
     if !blockers.is_empty() {
@@ -94,8 +93,8 @@ fn handle_loading(
 pub(super) fn register_my_ldtk_load(app: &mut App) {
     app.insert_resource(MyLdtkLoadState::default());
 
-    app.add_observer(handle_start_my_ldtk_load);
-    app.add_observer(handle_unload_my_ldtk);
+    app.add_observer(handle_load_my_ldtk_level);
+    app.add_observer(handle_unload_my_ldtk_level);
 
     app.add_systems(Update, handle_loading.run_if(is_loading));
 }

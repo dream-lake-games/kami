@@ -100,7 +100,7 @@ fn startup(mut commands: Commands, ass: Res<AssetServer>) {
         Pos::new(0.0, 0.0),
         Dyno::new(0.0, 0.0),
         StaticRx::single(StaticRxKind::Default, player_hbox.clone()),
-        TriggerRx::single(TriggerRxKind::Player, player_hbox.clone()),
+        TriggerRx::single(TriggerRxKind::Chef, player_hbox.clone()),
         MainStaticLayer::RENDER_LAYERS,
         LightMan::new(Light64Anim::On),
     ));
