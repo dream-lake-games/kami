@@ -42,12 +42,10 @@ derive_anim!(
         #[file("chefs/drop.png")]
         #[size(24, 24)]
         #[render_layers(MainStaticLayer)]
-        #[offset(0.0, 7.0)]
         Drop,
         #[file("chefs/lift.png")]
         #[size(24, 24)]
         #[render_layers(MainStaticLayer)]
-        #[offset(0.0, 7.0)]
         Lift,
         #[file("chefs/sleep.png")]
         #[size(24, 24)]

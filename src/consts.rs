@@ -9,6 +9,10 @@ pub const OVERLAY_UVEC: UVec2 = UVec2::new(
 );
 pub const OVERLAY_VEC: Vec2 = Vec2::new(OVERLAY_UVEC.x as f32, OVERLAY_UVEC.y as f32);
 
+// Convenience
+pub const PI: f32 = std::f32::consts::PI;
+pub const TAU: f32 = std::f32::consts::TAU;
+
 /// Gameplay zixes
 pub const ZIX_CHEF: f32 = 50.0;
 

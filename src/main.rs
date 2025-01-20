@@ -57,7 +57,7 @@ fn main() {
 
     // NOTE: Has to be first
     app.add_plugins(two_delight::TwoDelightPlugin);
-    app.add_plugins(bevy_egui::EguiPlugin);
+    // app.add_plugins(bevy_egui::EguiPlugin); // added by framepace
 
     app.add_plugins((
         anim::BonusAnimPlugin,
