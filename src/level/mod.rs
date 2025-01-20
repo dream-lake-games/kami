@@ -7,6 +7,7 @@ pub struct LevelState {
     pub lid: String,
     pub paused: bool,
     pub rect: Rect,
+    pub score: i32,
 }
 
 pub(super) struct LevelPlugin;

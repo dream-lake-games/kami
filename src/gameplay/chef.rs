@@ -8,12 +8,15 @@ struct ChefConsts {
     max_speed: f32,
     stop_speed_cutoff: f32,
     stop_sleep_time: f32,
-    dirt_par_mul: f32,
-    dirt_perp_mul: f32,
-    dirt_slide_speed: f32,
-    smooth_par_mul: f32,
-    smooth_perp_mul: f32,
-    smooth_slide_speed: f32,
+    dirt_rough_par_mul: f32,
+    dirt_rough_perp_mul: f32,
+    dirt_rough_slide_speed: f32,
+    dirt_smooth_par_mul: f32,
+    dirt_smooth_perp_mul: f32,
+    dirt_smooth_slide_speed: f32,
+    cake_par_mul: f32,
+    cake_perp_mul: f32,
+    cake_slide_speed: f32,
     air_drag_speed: f32,
     lift_mul: f32,
 }
@@ -26,14 +29,17 @@ impl Default for ChefConsts {
             max_speed: 300.0,
             stop_speed_cutoff: 8.0,
             stop_sleep_time: 0.5,
-            dirt_par_mul: 0.7,
-            dirt_perp_mul: 0.4,
-            dirt_slide_speed: 100.0,
-            smooth_par_mul: 0.95,
-            smooth_perp_mul: 0.2,
-            smooth_slide_speed: 10.0,
+            dirt_rough_par_mul: 0.7,
+            dirt_rough_perp_mul: 0.4,
+            dirt_rough_slide_speed: 80.0,
+            dirt_smooth_par_mul: 0.95,
+            dirt_smooth_perp_mul: 0.3,
+            dirt_smooth_slide_speed: 10.0,
+            cake_par_mul: 0.5,
+            cake_perp_mul: 0.2,
+            cake_slide_speed: 120.0,
             air_drag_speed: 2.0,
-            lift_mul: 5.0,
+            lift_mul: 4.5,
         }
     }
 }
@@ -265,18 +271,23 @@ fn maybe_update_flight(
     let mut is_sliding_this_frame = false;
     for coll in &my_colls {
         let (par_mul, perp_mul, slide_speed) = match coll.tx_hbox {
-            HBOX_DIRT => {
+            HBOX_DIRT_ROUGH => {
                 // So uhhhhh didn't I make a library to do this...? Lol
                 (
-                    consts.dirt_par_mul,
-                    consts.dirt_perp_mul,
-                    consts.dirt_slide_speed,
+                    consts.dirt_rough_par_mul,
+                    consts.dirt_rough_perp_mul,
+                    consts.dirt_rough_slide_speed,
                 )
             }
-            HBOX_SMOOTH => (
-                consts.smooth_par_mul,
-                consts.smooth_perp_mul,
-                consts.smooth_slide_speed,
+            HBOX_DIRT_SMOOTH => (
+                consts.dirt_smooth_par_mul,
+                consts.dirt_smooth_perp_mul,
+                consts.dirt_smooth_slide_speed,
+            ),
+            HBOX_CAKE_GREEN | HBOX_CAKE_BLUE | HBOX_CAKE_PINK | HBOX_CAKE_RED => (
+                consts.cake_par_mul,
+                consts.cake_perp_mul,
+                consts.cake_slide_speed,
             ),
             _ => {
                 #[cfg(debug_assertions)]

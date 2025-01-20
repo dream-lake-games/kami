@@ -29,15 +29,3 @@ impl Plugin for MyLdtkPlugin {
         });
     }
 }
-
-pub trait UnfuckLevelSelection {
-    fn to_lid(&self) -> String;
-}
-impl UnfuckLevelSelection for LevelSelection {
-    fn to_lid(&self) -> String {
-        let LevelSelection::Iid(iid) = self else {
-            panic!("can't unfuck level selection");
-        };
-        iid.to_string()
-    }
-}

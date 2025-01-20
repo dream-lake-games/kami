@@ -40,6 +40,7 @@ fn handle_load_level(
         lid,
         paused: false,
         rect: default(),
+        score: 0,
     };
     next_meta_state.set(MetaState::LevelLoading);
 }

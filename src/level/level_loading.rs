@@ -14,6 +14,7 @@ impl MyLdtkEntity for LevelMeta {
 }
 fn on_add_level_meta(mut world: DeferredWorld, eid: Entity, _: ComponentId) {
     let level_meta = world.get::<LevelMeta>(eid).cloned().unwrap();
+    world.commands().entity(eid).insert(Name::new("LevelMeta"));
     world.commands().trigger(SetupBg::kind(level_meta.bg_kind));
 }
 

@@ -10,7 +10,6 @@ mod level;
 mod menu;
 mod my_ldtk;
 mod root;
-mod scratch;
 mod state;
 mod two_delight;
 
@@ -68,7 +67,6 @@ fn main() {
         menu::MenuPlugin,
         my_ldtk::MyLdtkPlugin,
         root::RootPlugin,
-        // scratch::ScratchPlugin,
         state::StatePlugin,
     ));
 

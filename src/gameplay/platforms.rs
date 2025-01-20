@@ -1,17 +1,17 @@
 use crate::prelude::*;
 
 #[derive(Bundle)]
-struct DirtBundle {
+struct DirtRoughBundle {
     name: Name,
     pos: Pos,
     stx: StaticTx,
 }
-impl MyLdtkIntCellValue for DirtBundle {
+impl MyLdtkIntCellValue for DirtRoughBundle {
     type Root = LevelPlatformRoot;
     fn from_ldtk(pos: Pos, _value: i32) -> Self {
-        let hbox = HBox::new(8, 8).with_marker(HBOX_DIRT);
+        let hbox = HBox::new(8, 8).with_marker(HBOX_DIRT_ROUGH);
         Self {
-            name: Name::new("Dirt"),
+            name: Name::new("DirtRough"),
             pos,
             stx: StaticTx::single(StaticTxKind::Solid, hbox),
         }
@@ -19,17 +19,17 @@ impl MyLdtkIntCellValue for DirtBundle {
 }
 
 #[derive(Bundle)]
-struct SmoothBundle {
+struct DirtSmoothBundle {
     name: Name,
     pos: Pos,
     stx: StaticTx,
 }
-impl MyLdtkIntCellValue for SmoothBundle {
+impl MyLdtkIntCellValue for DirtSmoothBundle {
     type Root = LevelPlatformRoot;
     fn from_ldtk(pos: Pos, _value: i32) -> Self {
-        let hbox = HBox::new(8, 8).with_marker(HBOX_SMOOTH);
+        let hbox = HBox::new(8, 8).with_marker(HBOX_DIRT_SMOOTH);
         Self {
-            name: Name::new("Smooth"),
+            name: Name::new("DirtSmooth"),
             pos,
             stx: StaticTx::single(StaticTxKind::Solid, hbox),
         }
@@ -38,15 +38,14 @@ impl MyLdtkIntCellValue for SmoothBundle {
 
 pub(super) fn register_platforms(app: &mut App) {
     MyLdtkIntCellLayer::new("DirtStatic", MainStaticLayer).register(app);
-    app.add_plugins(MyLdtkIntCellValuePlugin::<DirtBundle>::multiple(
+    MyLdtkIntCellLayer::new("DirtDetail", MainDetailLayer).register(app);
+
+    app.add_plugins(MyLdtkIntCellValuePlugin::<DirtRoughBundle>::multiple(
         "DirtStatic",
         vec![1, 2],
     ));
-    MyLdtkIntCellLayer::new("DirtDetail", MainDetailLayer).register(app);
-
-    MyLdtkIntCellLayer::new("SmoothStatic", MainStaticLayer).register(app);
-    app.add_plugins(MyLdtkIntCellValuePlugin::<SmoothBundle>::multiple(
-        "SmoothStatic",
-        vec![1],
+    app.add_plugins(MyLdtkIntCellValuePlugin::<DirtSmoothBundle>::multiple(
+        "DirtStatic",
+        vec![3],
     ));
 }
