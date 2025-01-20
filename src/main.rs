@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+mod anim;
+mod bg;
 mod consts;
 mod debug;
 mod level;
@@ -14,10 +16,15 @@ mod two_delight;
 /// be able to `use crate::prelude::*` and get everything I need at the top of files.
 #[expect(unused_imports)]
 mod prelude {
-    pub use super::{consts::*, level::*, menu::*, my_ldtk::*, root::*, state::*, two_delight::*};
+    pub use super::{
+        anim::*, bg::*, consts::*, level::*, menu::*, my_ldtk::*, root::*, state::*, two_delight::*,
+    };
     pub use bevy::{
         color::palettes::tailwind,
-        ecs::component::StorageType,
+        ecs::{
+            component::{ComponentId, StorageType},
+            world::DeferredWorld,
+        },
         input::common_conditions::input_toggle_active,
         log,
         math::VectorSpace,
@@ -50,6 +57,8 @@ fn main() {
     app.add_plugins(bevy_egui::EguiPlugin);
 
     app.add_plugins((
+        anim::BonusAnimPlugin,
+        bg::BgPlugin,
         level::LevelPlugin,
         menu::MenuPlugin,
         my_ldtk::MyLdtkPlugin,

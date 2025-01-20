@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// The set that contains all ldtk level maintainence
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct MyLdtkLevelMaint;
+pub(super) struct MyLdtkLevelMaint;
 
 /// Updates level rect
 fn update_my_level_rect(

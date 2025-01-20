@@ -75,6 +75,7 @@ fn handle_loading(
     mut commands: Commands,
     mut blockers: Query<(Entity, &mut BlockMyLdtkLoad)>,
     mut my_ldtk_load_state: ResMut<MyLdtkLoadState>,
+    // level_state_q: Query,
 ) {
     // Check for explicit blockers
     if !blockers.is_empty() {

@@ -141,23 +141,19 @@ macro_rules! impl_subroot_init {
 
 impl_root_init!(
     LayerRoot,
-    WorldRoot,
+    LevelRoot,
     MenuRoot(ZIX_MENU),
     TransitionRoot(ZIX_TRANSITION),
     ObserveRoot,
     SoundRoot,
-    ConvoRoot,
-    CutsceneRoot,
-    PauseRoot(ZIX_PAUSE),
     DebugRoot,
     GamepadRoot,
 );
 
 impl_subroot_init!(
-    PlatformRoot(WorldRoot),
-    WorldDetailRoot(WorldRoot),
-    LightRoot(WorldRoot),
-    BgFgRoot(WorldRoot),
-    ItemsRoot(WorldRoot),
-    WorldMetaRoot(WorldRoot),
+    LevelActiveRoot(LevelRoot),
+    LevelBgRoot(LevelRoot),
+    LevelDetailRoot(LevelRoot),
+    LevelMetaRoot(LevelRoot),
+    LevelPlatformRoot(LevelRoot),
 );

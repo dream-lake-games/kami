@@ -1,15 +1,14 @@
 use crate::prelude::*;
 
 // mod my_ldtk_consolidate;
-// mod my_ldtk_entity;
+mod my_ldtk_entity;
 mod my_ldtk_int_cell;
 mod my_ldtk_level_maint;
 mod my_ldtk_load;
 
 // pub use my_ldtk_consolidate::*;
-// pub use my_ldtk_entity::*;
+pub use my_ldtk_entity::*;
 pub use my_ldtk_int_cell::*;
-// pub use my_ldtk_level_maint::*;
 pub use my_ldtk_load::*;
 
 /// The set that contains all weird ldtk maintenence
