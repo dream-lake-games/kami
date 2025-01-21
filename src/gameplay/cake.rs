@@ -20,7 +20,6 @@ impl<const HBOX_MARKER: HBoxMarker> MyLdtkIntCellValue for CakeBundle<HBOX_MARKE
 
 pub(super) fn register_cake(app: &mut App) {
     MyLdtkIntCellLayer::new("CakeStatic", MainStaticLayer).register(app);
-    // MyLdtkIntCellLayer::new("DirtDetail", MainDetailLayer).register(app);
 
     macro_rules! add_cake {
         ($(($value:literal, $marker:ident)$(,)?)+) => {

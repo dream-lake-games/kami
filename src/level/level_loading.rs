@@ -18,7 +18,10 @@ fn on_add_level_meta(mut world: DeferredWorld, eid: Entity, _: ComponentId) {
     world.commands().trigger(SetupBg::kind(level_meta.bg_kind));
 }
 
-fn setup(mut commands: Commands, root: Res<TransitionRoot>) {
+#[derive(Component)]
+#[expect(dead_code)]
+struct Hacking(Handle<LdtkProject>);
+fn setup(mut commands: Commands, root: Res<TransitionRoot>, ass: Res<AssetServer>) {
     commands
         .spawn((
             Name::new("LoadingAnim"),
@@ -27,6 +30,10 @@ fn setup(mut commands: Commands, root: Res<TransitionRoot>) {
             AnimMan::new(LoadingAnim::default()),
         ))
         .set_parent(root.eid());
+    commands.spawn((
+        Name::new("AlwaysLdtkHandle"),
+        Hacking(ass.load("worlds/base.ldtk")),
+    ));
 }
 
 #[derive(Event)]
@@ -54,14 +61,16 @@ fn handle_despawn_level(
 fn on_enter_loading(mut commands: Commands, mut loading: Query<&mut AnimMan<LoadingAnim>>) {
     commands.trigger(DespawnLevel);
     commands.trigger(UnloadMyLdtkLevel);
-    commands.trigger(LoadMyLdtkLevel::new(
-        "worlds/base.ldtk",
-        "6dab9440-c210-11ef-ab00-79b1690c4bfe",
-    ));
     loading.single_mut().set_state(LoadingAnim::Dots);
 }
 
 fn update_loading(my_ldtk_load_state: Res<MyLdtkLoadState>, mut commands: Commands) {
+    if matches!(my_ldtk_load_state.as_ref(), MyLdtkLoadState::Unloaded) {
+        commands.trigger(LoadMyLdtkLevel::new(
+            "worlds/base.ldtk",
+            "6dab9440-c210-11ef-ab00-79b1690c4bfe",
+        ));
+    }
     if !matches!(my_ldtk_load_state.into_inner(), MyLdtkLoadState::Loaded) {
         return;
     }

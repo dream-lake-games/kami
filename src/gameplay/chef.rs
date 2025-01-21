@@ -1,3 +1,5 @@
+use egui::Color32;
+
 use crate::{debug::debug_resource, prelude::*};
 
 #[derive(Resource, Reflect)]
@@ -152,7 +154,9 @@ fn maybe_spawn_chefs(
     mut commands: Commands,
     root: Res<LevelActiveRoot>,
 ) {
-    let (mut chef_start, start_pos) = chef_start.single_mut();
+    let Ok((mut chef_start, start_pos)) = chef_start.get_single_mut() else {
+        return;
+    };
     for order in 0..chef_start.needs_spawn {
         commands
             .spawn(ChefBundle::new(
@@ -406,10 +410,18 @@ fn maybe_update_flight(
 }
 
 fn maybe_end_flight(
-    mut chef_q: Query<(&mut AnimMan<ChefAnim>, &mut Dyno, &mut Chef, &StaticRx)>,
+    mut chef_q: Query<(
+        &mut AnimMan<ChefAnim>,
+        &mut Dyno,
+        &mut Chef,
+        &StaticRx,
+        &mut Pos,
+    )>,
     consts: Res<ChefConsts>,
     bullet_time: Res<BulletTime>,
     static_colls: Res<StaticColls>,
+    mut level_state: ResMut<LevelState>,
+    pos_q: Query<&Pos, Without<AnimMan<ChefAnim>>>,
 ) {
     let Some(mut flying_chef) = chef_q
         .iter_mut()
@@ -418,11 +430,12 @@ fn maybe_end_flight(
     else {
         return;
     };
-    let above_ground = static_colls
+    let above_colls = static_colls
         .get_refs(&flying_chef.3.coll_keys)
-        .iter()
-        .any(|coll| coll.push.y > 0.0);
-    if above_ground && is_functionally_stopped(flying_chef.1.vel, &consts) {
+        .into_iter()
+        .filter(|coll| coll.push.y > 0.0)
+        .collect::<Vec<_>>();
+    if !above_colls.is_empty() && is_functionally_stopped(flying_chef.1.vel, &consts) {
         flying_chef.2.stopped_time += bullet_time.delta_secs();
     } else {
         flying_chef.2.stopped_time = 0.0;
@@ -434,7 +447,97 @@ fn maybe_end_flight(
         flying_chef.0.set_flip_x(new_flip_x);
         flying_chef.0.set_flip_y(false);
         flying_chef.0.set_body_rot(0.0);
+
+        let Some(above_coll) = above_colls
+            .into_iter()
+            .max_by(|a, b| a.push.y.total_cmp(&b.push.y))
+        else {
+            panic!("there should be an above_coll here");
+        };
+        let block_pos = pos_q.get(above_coll.tx_ctrl).unwrap();
+        flying_chef.4.x = flying_chef.4.x.clamp(block_pos.x - 4.0, block_pos.x + 4.0);
+        match above_coll.tx_hbox {
+            HBOX_CAKE_GREEN => {
+                level_state.score -= 100;
+            }
+            HBOX_CAKE_BLUE => {
+                level_state.score += 100;
+            }
+            HBOX_CAKE_PINK => {
+                level_state.score += 200;
+            }
+            HBOX_CAKE_RED => {
+                level_state.score += 400;
+            }
+            _ => (),
+        }
     }
+}
+
+fn maybe_show_end(
+    chef_q: Query<(&AnimMan<ChefAnim>,)>,
+    mut contexts: EguiContexts,
+    mut commands: Commands,
+    level_state: Res<LevelState>,
+) {
+    let at_end = chef_q
+        .iter()
+        .all(|chef| matches!(chef.0.get_state(), ChefAnim::Sleep));
+    if !at_end {
+        return;
+    }
+
+    let level_defn = get_level_defn(&level_state.lid);
+
+    let ctx = contexts.ctx_mut();
+    egui::CentralPanel::default()
+        .frame(egui::Frame::none().fill(Color32::from_rgba_premultiplied(
+            EGC8.r(),
+            EGC8.g(),
+            EGC8.b(),
+            220,
+        )))
+        .show(ctx, |ui| {
+            let force_width = 600.0;
+            ui.vertical_centered(|ui| {
+                ui.set_min_width(force_width);
+                ui.set_max_width(force_width);
+                let vspacing = ui.available_height() / 24.0;
+                ui.style_mut().visuals.override_text_color = Some(EGC1);
+                ui.add_space(vspacing);
+                ui.heading("SCORE");
+                ui.label(level_state.score.to_string());
+                ui.small(format!("HI: 100"));
+                ui.add_space(vspacing);
+                ui.vertical(|ui| {
+                    render_tier_grid(ui, force_width, &level_defn.tiers, None);
+                });
+                ui.add_space(vspacing);
+                ui.style_mut().visuals.override_text_color = Some(EGC8);
+                if ui
+                    .add_sized(control_butt_size(), egui::Button::new("NEXT"))
+                    .clicked()
+                {
+                    commands.trigger(NextLevel);
+                }
+                ui.add_space(vspacing);
+                if ui
+                    .add_sized(control_butt_size(), egui::Button::new("RETRY"))
+                    .clicked()
+                {
+                    commands.trigger(
+                        LoadLevel::lid(level_state.lid.clone()).with_skip_intro_messages(true),
+                    );
+                }
+                ui.add_space(vspacing);
+                if ui
+                    .add_sized(control_butt_size(), egui::Button::new("MENU"))
+                    .clicked()
+                {
+                    commands.trigger(LoadMenu::kind(MenuKind::Levels));
+                }
+            });
+        });
 }
 
 pub(super) fn register_chefs(app: &mut App) {
@@ -456,10 +559,13 @@ pub(super) fn register_chefs(app: &mut App) {
             maybe_update_charge,
             maybe_update_flight,
             maybe_end_flight,
+            maybe_show_end,
         )
             .chain()
             .run_if(in_state(MetaState::Level))
+            .run_if(physics_active)
             .after(InputSet)
-            .after(PhysicsSet),
+            .after(PhysicsSet)
+            .after(egui_always_helpers),
     );
 }

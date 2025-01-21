@@ -38,7 +38,7 @@ impl MyLdtkIntCellValue for DirtSmoothBundle {
 
 pub(super) fn register_platforms(app: &mut App) {
     MyLdtkIntCellLayer::new("DirtStatic", MainStaticLayer).register(app);
-    MyLdtkIntCellLayer::new("DirtDetail", MainDetailLayer).register(app);
+    MyLdtkIntCellLayer::new("DirtDetail", MainStaticLayer).register(app);
 
     app.add_plugins(MyLdtkIntCellValuePlugin::<DirtRoughBundle>::multiple(
         "DirtStatic",

@@ -29,6 +29,7 @@ fn handle_load_my_ldtk_level(
     mut commands: Commands,
     ass: Res<AssetServer>,
     mut my_ldtk_load_state: ResMut<MyLdtkLoadState>,
+    root: Res<LevelMetaRoot>,
 ) {
     commands.spawn((
         Name::new("MyLdtkRoot"),
@@ -38,8 +39,10 @@ fn handle_load_my_ldtk_level(
             },
             ..default()
         },
-        BlockMyLdtkLoad::ticks(30),
     ));
+    commands
+        .spawn((Name::new("RogueBlockLoad"), BlockMyLdtkLoad::ticks(30)))
+        .set_parent(root.eid());
     commands.insert_resource(LevelSelection::iid(&trigger.event().level_lid));
     *my_ldtk_load_state = MyLdtkLoadState::Loading;
 }
@@ -75,6 +78,7 @@ fn handle_loading(
     mut commands: Commands,
     mut blockers: Query<(Entity, &mut BlockMyLdtkLoad)>,
     mut my_ldtk_load_state: ResMut<MyLdtkLoadState>,
+    keyboard: Res<ButtonInput<KeyCode>>,
 ) {
     // Check for explicit blockers
     if !blockers.is_empty() {

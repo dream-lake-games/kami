@@ -9,9 +9,16 @@ derive_anim!(
         #[file("transition/loading.png")]
         #[size(64, 64)]
         #[length(5)]
-        #[fps(5.0)]
+        #[fps(10.0)]
         #[render_layers(TransitionLayer)]
         Dots,
+        #[file("transition/loading.png")]
+        #[size(64, 64)]
+        #[length(5)]
+        #[fps(10.0)]
+        #[render_layers(TransitionLayer)]
+        #[next(None)]
+        FakeDots,
     }
 );
 

@@ -1,3 +1,5 @@
+use egui::Color32;
+
 use crate::prelude::*;
 
 pub const SCREEN_UVEC: UVec2 = UVec2::new(240, 240);
@@ -28,3 +30,11 @@ pub const HBOX_DIRT_SMOOTH: HBoxMarker = 22;
 /// Root zixes
 pub const ZIX_MENU: i32 = 100;
 pub const ZIX_TRANSITION: i32 = 200;
+
+/// Egui colors
+pub const EGC1: Color32 = Color32::from_rgb(205, 212, 165);
+pub const EGC2: Color32 = Color32::from_rgb(207, 169, 138);
+pub const EGC3: Color32 = Color32::from_rgb(199, 120, 111);
+pub const EGC6: Color32 = Color32::from_rgb(59, 64, 94);
+pub const EGC7: Color32 = Color32::from_rgb(46, 42, 79);
+pub const EGC8: Color32 = Color32::from_rgb(33, 29, 56);
