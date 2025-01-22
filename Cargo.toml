@@ -12,7 +12,6 @@ paste = "1.0.15"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.113"
 rand = "0.8.5"
-bevy = "0.15"
 bevy_2delight_anims = { path = "../bevy_2delight_anims" }
 bevy_2delight_physics = { path = "../bevy_2delight_physics" }
 bevy_2delight_layers = { path = "../bevy_2delight_layers" }
@@ -24,3 +23,28 @@ bevy-inspector-egui = "0.28"
 bevy_pkv = "0.12"
 inventory = "0.3.17"
 lazy_static = "1.5.0"
+
+[dependencies.bevy]
+version = "0.15"
+default-features = false
+features = [
+    "bevy_asset",
+    "bevy_audio",
+    "bevy_color",
+    "bevy_core_pipeline",
+    "bevy_gizmos",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_state",
+    "bevy_text",
+    "bevy_window",
+    "bevy_winit",
+    "custom_cursor",
+    "default_font",
+    "multi_threaded",
+    "png",
+    "sysinfo_plugin",
+    "vorbis",
+    "webgl2",
+    "x11",
+]

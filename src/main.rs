@@ -57,7 +57,6 @@ fn main() {
 
     // NOTE: Has to be first
     app.add_plugins(two_delight::TwoDelightPlugin);
-    // app.add_plugins(bevy_egui::EguiPlugin); // added by framepace
 
     app.add_plugins((
         anim::BonusAnimPlugin,
@@ -71,6 +70,11 @@ fn main() {
         state::StatePlugin,
     ));
 
+    #[cfg(not(debug_assertions))]
+    {
+        // Added by framepace. So when we have release build, we need to add
+        app.add_plugins(bevy_egui::EguiPlugin);
+    }
     #[cfg(debug_assertions)]
     {
         app.add_plugins(debug::DebugPlugin);

@@ -5,14 +5,6 @@ lazy_static::lazy_static! {
         LevelDefn::new(
             "CAKES IN THE FOREST",
             "6dab9440-c210-11ef-ab00-79b1690c4bfe",
-            vec![
-                LevelIntroMessage::new("TITLE", "For too long squirrels have been oppressed.")
-            ],
-            LevelTierCutoff::new(0, 100, 200),
-        ),
-        LevelDefn::new(
-            "SAME ASS LEVEL",
-            "6dab9440-c210-11ef-ab00-79b1690c4bfe",
             vec![],
             LevelTierCutoff::new(0, 100, 200),
         ),

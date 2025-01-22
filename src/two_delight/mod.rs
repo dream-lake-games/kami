@@ -18,7 +18,7 @@ struct Framepace {
 impl Default for Framepace {
     fn default() -> Self {
         Framepace {
-            fps_limit: 60.0,
+            fps_limit: 30.0,
             active: true,
         }
     }
@@ -46,8 +46,8 @@ impl Plugin for TwoDelightPlugin {
                 resizable: true,
                 title: "Pirate Jam 16".to_string(),
                 resolution: bevy::window::WindowResolution::new(OVERLAY_VEC.x, OVERLAY_VEC.y),
-                // mode: bevy::window::WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
-                mode: bevy::window::WindowMode::Windowed,
+                mode: bevy::window::WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
+                // mode: bevy::window::WindowMode::Windowed,
                 ..default()
             },
             asset_plugin: AssetPlugin {
@@ -69,10 +69,13 @@ impl Plugin for TwoDelightPlugin {
         // Physics
         app.add_plugins(PhysicsPlugin::default());
 
-        // Fuck it shoving framepacing in here too
-        app.insert_resource(Framepace::default());
-        debug_resource!(app, Framepace);
-        app.add_plugins(bevy_framepace::FramepacePlugin);
-        app.add_systems(Update, update_framepace);
+        #[cfg(debug_assertions)]
+        {
+            // Fuck it shoving framepacing in here too
+            app.insert_resource(Framepace::default());
+            debug_resource!(app, Framepace);
+            app.add_plugins(bevy_framepace::FramepacePlugin);
+            app.add_systems(Update, update_framepace);
+        }
     }
 }

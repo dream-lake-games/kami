@@ -2,6 +2,10 @@ use egui::Color32;
 
 use crate::{debug::debug_resource, prelude::*};
 
+/// "Slide speed" is a bit of misnomer
+/// To help with framerate independence, when sliding, we don't multiply by some frac,
+/// but subtract some amount. This "slide speed" is how much we subtract. So higher
+/// actually means a less slippery surface
 #[derive(Resource, Reflect)]
 struct ChefConsts {
     min_launch_speed: f32,
@@ -22,17 +26,41 @@ struct ChefConsts {
     air_drag_speed: f32,
     lift_mul: f32,
 }
+// // These are good, but a bit too fast. Makes the game too hard, esp on web builds with less consistent fps
+// impl Default for ChefConsts {
+//     fn default() -> Self {
+//         Self {
+//             min_launch_speed: 5.0,
+//             max_launch_speed: 100.0,
+//             gravity: 100.0,
+//             max_speed: 300.0,
+//             stop_speed_cutoff: 8.0,
+//             stop_sleep_time: 0.5,
+//             dirt_rough_par_mul: 0.7,
+//             dirt_rough_perp_mul: 0.4,
+//             dirt_rough_slide_speed: 80.0,
+//             dirt_smooth_par_mul: 0.95,
+//             dirt_smooth_perp_mul: 0.3,
+//             dirt_smooth_slide_speed: 10.0,
+//             cake_par_mul: 0.5,
+//             cake_perp_mul: 0.2,
+//             cake_slide_speed: 120.0,
+//             air_drag_speed: 2.0,
+//             lift_mul: 4.5,
+//         }
+//     }
+// }
 impl Default for ChefConsts {
     fn default() -> Self {
         Self {
             min_launch_speed: 5.0,
             max_launch_speed: 100.0,
-            gravity: 100.0,
-            max_speed: 300.0,
+            gravity: 50.0,
+            max_speed: 115.0,
             stop_speed_cutoff: 8.0,
             stop_sleep_time: 0.5,
             dirt_rough_par_mul: 0.7,
-            dirt_rough_perp_mul: 0.4,
+            dirt_rough_perp_mul: 0.5,
             dirt_rough_slide_speed: 80.0,
             dirt_smooth_par_mul: 0.95,
             dirt_smooth_perp_mul: 0.3,
@@ -41,7 +69,7 @@ impl Default for ChefConsts {
             cake_perp_mul: 0.2,
             cake_slide_speed: 120.0,
             air_drag_speed: 2.0,
-            lift_mul: 4.5,
+            lift_mul: 2.95,
         }
     }
 }
@@ -258,7 +286,7 @@ impl HorDir {
 fn maybe_update_flight(
     mut chef_q: Query<(&mut AnimMan<ChefAnim>, &mut Dyno, &StaticRx, &mut Chef)>,
     butt_input: Res<ButtInput>,
-    bullet_time: Res<BulletTime>,
+    mut bullet_time: ResMut<BulletTime>,
     consts: Res<ChefConsts>,
     static_colls: Res<StaticColls>,
 ) {
@@ -344,6 +372,19 @@ fn maybe_update_flight(
                 });
             }
         }
+    }
+    if flying_chef.3.current_lift.is_some() {
+        if bullet_time.get_base() == BulletTimeSpeed::Normal {
+            bullet_time.clear_effects();
+            bullet_time.add_effect(BulletTimeSpeed::LiftTransition, 0.1);
+        }
+        bullet_time.set_base(BulletTimeSpeed::LiftSlow);
+    } else {
+        bullet_time.clear_effects();
+        if bullet_time.get_base() == BulletTimeSpeed::LiftSlow {
+            bullet_time.add_effect(BulletTimeSpeed::LiftTransition, 0.1);
+        }
+        bullet_time.set_base(BulletTimeSpeed::Normal);
     }
 
     // Air drag

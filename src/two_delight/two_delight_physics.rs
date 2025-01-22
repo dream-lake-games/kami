@@ -12,18 +12,19 @@ pub enum TriggerTxKind {
 }
 impl TriggerKind for TriggerTxKind {}
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub enum BulletTimeSpeed {
     #[default]
     Normal,
-    #[expect(dead_code)]
-    Slow,
+    LiftTransition,
+    LiftSlow,
 }
 impl BulletTimeClass for BulletTimeSpeed {
     fn to_factor(&self) -> f32 {
         match self {
             Self::Normal => 1.0,
-            Self::Slow => 0.33,
+            Self::LiftTransition => 0.8,
+            Self::LiftSlow => 0.6,
         }
     }
 }

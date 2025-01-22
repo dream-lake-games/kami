@@ -18,10 +18,7 @@ fn on_add_level_meta(mut world: DeferredWorld, eid: Entity, _: ComponentId) {
     world.commands().trigger(SetupBg::kind(level_meta.bg_kind));
 }
 
-#[derive(Component)]
-#[expect(dead_code)]
-struct Hacking(Handle<LdtkProject>);
-fn setup(mut commands: Commands, root: Res<TransitionRoot>, ass: Res<AssetServer>) {
+fn setup(mut commands: Commands, root: Res<TransitionRoot>) {
     commands
         .spawn((
             Name::new("LoadingAnim"),
@@ -30,10 +27,6 @@ fn setup(mut commands: Commands, root: Res<TransitionRoot>, ass: Res<AssetServer
             AnimMan::new(LoadingAnim::default()),
         ))
         .set_parent(root.eid());
-    commands.spawn((
-        Name::new("AlwaysLdtkHandle"),
-        Hacking(ass.load("worlds/base.ldtk")),
-    ));
 }
 
 #[derive(Event)]

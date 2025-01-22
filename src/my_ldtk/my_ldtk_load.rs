@@ -78,7 +78,6 @@ fn handle_loading(
     mut commands: Commands,
     mut blockers: Query<(Entity, &mut BlockMyLdtkLoad)>,
     mut my_ldtk_load_state: ResMut<MyLdtkLoadState>,
-    keyboard: Res<ButtonInput<KeyCode>>,
 ) {
     // Check for explicit blockers
     if !blockers.is_empty() {

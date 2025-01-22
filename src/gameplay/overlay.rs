@@ -1,5 +1,3 @@
-use egui::Color32;
-
 use crate::prelude::*;
 
 #[derive(Component, Default)]
@@ -129,7 +127,6 @@ pub(super) fn register_overlay(app: &mut App) {
         Update,
         (update, show_intro_messages)
             .run_if(in_state(MetaState::Level))
-            .run_if(physics_inactive)
             .after(egui_always_helpers),
     );
     // app.add_systems(OnExit(MetaState::Level), on_exit_level);
