@@ -19,7 +19,7 @@ impl Default for Framepace {
     fn default() -> Self {
         Framepace {
             fps_limit: 30.0,
-            active: true,
+            active: false,
         }
     }
 }

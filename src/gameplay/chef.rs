@@ -55,8 +55,8 @@ impl Default for ChefConsts {
         Self {
             min_launch_speed: 5.0,
             max_launch_speed: 100.0,
-            gravity: 50.0,
-            max_speed: 115.0,
+            gravity: 60.0,
+            max_speed: 125.0,
             stop_speed_cutoff: 8.0,
             stop_sleep_time: 0.5,
             dirt_rough_par_mul: 0.7,
@@ -69,7 +69,7 @@ impl Default for ChefConsts {
             cake_perp_mul: 0.2,
             cake_slide_speed: 120.0,
             air_drag_speed: 2.0,
-            lift_mul: 2.95,
+            lift_mul: 3.06,
         }
     }
 }
