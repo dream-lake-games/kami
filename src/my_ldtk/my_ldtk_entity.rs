@@ -41,6 +41,9 @@ fn post_ldtk_entity_blessing<B: MyLdtkEntity>(
     root: Res<B::Root>,
 ) {
     for (ldtk_eid, gt, wrapper) in &wrappers {
+        if gt.translation().x == 0.0 && gt.translation().y == 0.0 {
+            continue;
+        }
         let pos = Pos::new(gt.translation().x, gt.translation().y);
         let bund = B::from_ldtk(pos, &wrapper.fields, wrapper.iid.clone());
         commands.spawn(bund).set_parent(root.eid());

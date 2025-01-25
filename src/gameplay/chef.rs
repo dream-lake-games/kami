@@ -361,6 +361,7 @@ fn maybe_update_flight(
             && coll.push.x.signum() == flying_chef.1.vel.x.signum()
         {
             // Probably a bugged collision
+            flying_chef.1.vel = coll.rx_perp + coll.rx_par;
             continue;
         }
 
@@ -587,16 +588,14 @@ fn maybe_end_flight(
         flying_chef.4.x = flying_chef.4.x.clamp(block_pos.x - 4.0, block_pos.x + 4.0);
         let mut spawn_score = |anim: ScoreAnim, se: SoundEffect| {
             commands
-                .spawn((
-                    EphemeralAnim::new(
-                        anim,
-                        false,
-                        flying_chef.4.clone().translated(Vec2::Y * 18.0),
-                        ZIX_CHEF + 5.0,
-                    ),
-                    se,
-                ))
+                .spawn((EphemeralAnim::new(
+                    anim,
+                    false,
+                    flying_chef.4.clone().translated(Vec2::Y * 18.0),
+                    ZIX_CHEF + 5.0,
+                ),))
                 .set_parent(root.eid());
+            commands.spawn(se).set_parent(root.eid());
         };
         match above_coll.tx_hbox {
             HBOX_CAKE_GREEN => {
@@ -628,6 +627,7 @@ fn maybe_show_end(
     level_state: Res<LevelState>,
     mut save_data: ResMut<Pers<SaveData>>,
     mut store: ResMut<PkvStore>,
+    egui_textures: Res<EguiTextures>,
 ) {
     let at_end = chef_q
         .iter()
@@ -663,6 +663,7 @@ fn maybe_show_end(
         .iter()
         .position(|level_defn| level_defn.lid == level_state.lid)
         .unwrap();
+    let this_level_defn = &LEVEL_DEFNS[this_level_ix];
     if save_data.get().menu_ix as usize != this_level_ix {
         let old = save_data.get().clone();
         save_data.set(SaveData {
@@ -692,7 +693,7 @@ fn maybe_show_end(
             220,
         )))
         .show(ctx, |ui| {
-            let force_width = 600.0;
+            let force_width = 400.0;
             ui.vertical_centered(|ui| {
                 ui.set_min_width(force_width);
                 ui.set_max_width(force_width);
@@ -704,14 +705,24 @@ fn maybe_show_end(
                 ui.small(format!("HI: {hiscore}"));
                 ui.add_space(vspacing);
                 ui.vertical(|ui| {
-                    render_tier_grid(ui, force_width, &level_defn.tiers, None);
+                    render_tier_grid(
+                        ui,
+                        force_width,
+                        &level_defn.tiers,
+                        Some(level_state.score),
+                        &egui_textures,
+                    );
                 });
                 ui.add_space(vspacing);
                 ui.style_mut().visuals.override_text_color = Some(EGC8);
                 if ui
-                    .add_sized(control_butt_size(), egui::Button::new("NEXT"))
+                    .add_enabled(
+                        hiscore >= this_level_defn.tiers.one,
+                        egui::Button::new("NEXT").min_size(control_butt_size().into()),
+                    )
                     .clicked()
                 {
+                    commands.spawn(SoundEffect::MenuClick);
                     commands.trigger(NextLevel);
                 }
                 ui.add_space(vspacing);
@@ -719,6 +730,7 @@ fn maybe_show_end(
                     .add_sized(control_butt_size(), egui::Button::new("RETRY"))
                     .clicked()
                 {
+                    commands.spawn(SoundEffect::MenuClick);
                     commands.trigger(
                         LoadLevel::lid(level_state.lid.clone()).with_skip_intro_messages(true),
                     );
@@ -728,6 +740,7 @@ fn maybe_show_end(
                     .add_sized(control_butt_size(), egui::Button::new("MENU"))
                     .clicked()
                 {
+                    commands.spawn(SoundEffect::MenuClick);
                     commands.trigger(LoadMenu::kind(MenuKind::Levels));
                 }
             });
@@ -763,6 +776,16 @@ fn juice_trails(
             }
             _ => {}
         }
+    }
+}
+
+fn handle_restart(
+    mut commands: Commands,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    level_state: Res<LevelState>,
+) {
+    if keyboard.just_pressed(KeyCode::KeyR) {
+        commands.trigger(LoadLevel::lid(level_state.lid.clone()));
     }
 }
 
@@ -805,9 +828,13 @@ pub(super) fn register_chefs(app: &mut App) {
 
     app.add_systems(
         Update,
+        (handle_restart, maybe_spawn_chefs).run_if(in_state(MetaState::Level)),
+    );
+
+    app.add_systems(
+        Update,
         (
             invariants,
-            maybe_spawn_chefs,
             maybe_promote_chef,
             maybe_start_charge,
             maybe_update_charge,
@@ -820,7 +847,8 @@ pub(super) fn register_chefs(app: &mut App) {
             .run_if(physics_active)
             .after(InputSet)
             .after(PhysicsSet)
-            .after(egui_always_helpers),
+            .after(egui_always_helpers)
+            .after(maybe_spawn_chefs),
     );
 
     app.add_systems(

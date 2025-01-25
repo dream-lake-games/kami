@@ -34,6 +34,7 @@ impl SongManager {
         });
     }
 
+    #[expect(dead_code)]
     pub fn get_current(&self) -> Song {
         self.current
     }
@@ -44,7 +45,7 @@ fn setup_songs(mut commands: Commands, ass: Res<AssetServer>, sound_root: Res<So
         .spawn((SongMarker, Name::new("song")))
         .with_children(|parent| {
             parent.spawn((
-                AudioPlayer::new(ass.load("music/draft.ogg")),
+                AudioPlayer::new(ass.load(Song::TheWorldIsOurs.path())),
                 PlaybackSettings {
                     mode: bevy::audio::PlaybackMode::Loop,
                     volume: Volume::new(0.0),
@@ -60,7 +61,7 @@ fn setup_songs(mut commands: Commands, ass: Res<AssetServer>, sound_root: Res<So
 fn update_song(
     song_parent: Query<Entity, With<SongMarker>>,
     mut song_child: Query<(&AudioSink, &mut PlaybackSettings), With<SongMarkerChild>>,
-    sound_settings: Res<SoundSettings>,
+    sound_settings: Res<Pers<Settings>>,
     mut manager: ResMut<SongManager>,
     mut commands: Commands,
     time: Res<Time>,
@@ -72,7 +73,7 @@ fn update_song(
     };
     let child = song_child.get_single_mut();
     let kind_factor = manager.current.mult();
-    let settings_factor = sound_settings.main_volume * sound_settings.song_volume;
+    let settings_factor = sound_settings.get().music_volume;
     let set_volume = |x: f32| {
         if let Ok((audio_sink, mut playback_settings)) = child {
             audio_sink.set_volume(kind_factor * settings_factor * x);

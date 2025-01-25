@@ -29,6 +29,7 @@ fn spawn_sound_effects(
     sound_root: Res<SoundRoot>,
     ass: Res<AssetServer>,
     sound_mults: Res<SoundMults>,
+    settings: Res<Pers<Settings>>,
 ) {
     let mut exist_map: HashMap<SoundEffect, Vec<Entity>> = default();
     for (eid, se) in &existing {
@@ -51,7 +52,9 @@ fn spawn_sound_effects(
             None => true,
         };
         if surviving {
-            let mult = omult.map(|s| s.0).unwrap_or(1.0) * *sound_mults.map.get(se).unwrap_or(&1.0);
+            let mult = omult.map(|s| s.0).unwrap_or(1.0)
+                * *sound_mults.map.get(se).unwrap_or(&1.0)
+                * settings.get().effect_volume;
             commands
                 .entity(eid)
                 .insert((

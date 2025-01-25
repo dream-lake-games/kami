@@ -57,7 +57,7 @@ derive_anim!(
         #[file("chefs/sleep.png")]
         #[size(24, 24)]
         #[length(6)]
-        #[fps(8.0)]
+        #[fps(5.0)]
         #[render_layers(MainStaticLayer)]
         #[offset(0.0, 7.0)]
         Sleep,

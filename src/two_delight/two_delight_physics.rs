@@ -23,8 +23,8 @@ impl BulletTimeClass for BulletTimeSpeed {
     fn to_factor(&self) -> f32 {
         match self {
             Self::Normal => 1.0,
-            Self::LiftTransition => 0.8,
-            Self::LiftSlow => 0.6,
+            Self::LiftTransition => 0.84,
+            Self::LiftSlow => 0.68,
         }
     }
 }
@@ -32,7 +32,6 @@ impl BulletTimeClass for BulletTimeSpeed {
 // I _highly_ recommend you create type aliases here to cut back on some verbosity
 pub type TriggerRx = TriggerRxGeneric<TriggerRxKind>;
 pub type TriggerTx = TriggerTxGeneric<TriggerTxKind>;
-#[expect(dead_code)]
 pub type TriggerColls = TriggerCollsGeneric<TriggerRxKind, TriggerTxKind>;
 #[expect(dead_code)]
 pub type TriggerCollRec = TriggerCollRecGeneric<TriggerRxKind, TriggerTxKind>;

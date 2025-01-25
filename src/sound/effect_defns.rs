@@ -67,6 +67,9 @@ defn_effects!([
     ChefLaunch,
     "sounds/chef/launch.ogg",
     0.02,
+    MenuClick,
+    "sounds/menu/click.ogg",
+    0.08,
 ]);
 
 pub(super) fn register_effect_defns(app: &mut App) {
