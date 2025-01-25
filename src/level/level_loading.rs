@@ -18,7 +18,7 @@ fn on_add_level_meta(mut world: DeferredWorld, eid: Entity, _: ComponentId) {
     world.commands().trigger(SetupBg::kind(level_meta.bg_kind));
 }
 
-fn setup(mut commands: Commands, root: Res<TransitionRoot>) {
+fn setup(mut commands: Commands, root: Res<TransitionRoot>, mut song_manager: ResMut<SongManager>) {
     commands
         .spawn((
             Name::new("LoadingAnim"),
@@ -27,6 +27,7 @@ fn setup(mut commands: Commands, root: Res<TransitionRoot>) {
             AnimMan::new(LoadingAnim::default()),
         ))
         .set_parent(root.eid());
+    song_manager.fade_to(Song::TheWorldIsOurs);
 }
 
 #[derive(Event)]
@@ -51,17 +52,27 @@ fn handle_despawn_level(
     }
 }
 
-fn on_enter_loading(mut commands: Commands, mut loading: Query<&mut AnimMan<LoadingAnim>>) {
+fn on_enter_loading(
+    mut commands: Commands,
+    mut loading: Query<&mut AnimMan<LoadingAnim>>,
+    mut bullet_time: ResMut<BulletTime>,
+) {
     commands.trigger(DespawnLevel);
     commands.trigger(UnloadMyLdtkLevel);
     loading.single_mut().set_state(LoadingAnim::Dots);
+    bullet_time.clear_effects();
+    bullet_time.set_base(BulletTimeSpeed::Normal);
 }
 
-fn update_loading(my_ldtk_load_state: Res<MyLdtkLoadState>, mut commands: Commands) {
+fn update_loading(
+    my_ldtk_load_state: Res<MyLdtkLoadState>,
+    mut commands: Commands,
+    level_state: Res<LevelState>,
+) {
     if matches!(my_ldtk_load_state.as_ref(), MyLdtkLoadState::Unloaded) {
         commands.trigger(LoadMyLdtkLevel::new(
             "worlds/base.ldtk",
-            "6dab9440-c210-11ef-ab00-79b1690c4bfe",
+            level_state.lid.clone(),
         ));
     }
     if !matches!(my_ldtk_load_state.into_inner(), MyLdtkLoadState::Loaded) {

@@ -1,5 +1,3 @@
-use bevy::render::sync_world::RenderEntity;
-
 use crate::prelude::*;
 
 #[derive(Resource, Default)]
@@ -34,8 +32,6 @@ struct LayerHandled;
 fn post_ldtk_int_cell_layer_blessing(
     layer_info: Res<MyLdtkIntCellLayerInfo>,
     layer_q: Query<(Entity, &Name), (With<TilemapType>, Without<LayerHandled>)>,
-    // These are the ldtk backgrounds. Useless.
-    hooligans: Query<Entity, (With<RenderEntity>, Without<Name>, With<Sprite>)>,
     mut commands: Commands,
 ) {
     for (eid, name) in &layer_q {
@@ -46,9 +42,6 @@ fn post_ldtk_int_cell_layer_blessing(
             .entity(eid)
             .insert((LayerHandled, render_layers.clone()));
     }
-    for hooligan in &hooligans {
-        commands.entity(hooligan).despawn_recursive();
-    }
 }
 
 fn post_ldtk_int_cell_value_blessing<B: MyLdtkIntCellValue>(
@@ -58,6 +51,10 @@ fn post_ldtk_int_cell_value_blessing<B: MyLdtkIntCellValue>(
 ) {
     for (ldtk_eid, gt, wrapper) in &mut wrappers {
         let pos = Pos::new(gt.translation().x, gt.translation().y);
+        if pos.x == 0.0 && pos.y == 0.0 {
+            // Hopefully prevent the web bug
+            continue;
+        }
         let bund = B::from_ldtk(pos, wrapper.value);
         commands.spawn(bund).set_parent(root.eid());
         commands

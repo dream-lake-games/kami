@@ -10,6 +10,8 @@ mod level;
 mod menu;
 mod my_ldtk;
 mod root;
+mod save;
+mod sound;
 mod state;
 mod two_delight;
 
@@ -19,7 +21,7 @@ mod two_delight;
 mod prelude {
     pub use super::{
         anim::*, bg::*, consts::*, gameplay::*, input::*, level::*, menu::*, my_ldtk::*, root::*,
-        state::*, two_delight::*,
+        save::*, sound::*, state::*, two_delight::*,
     };
     pub use bevy::{
         color::palettes::tailwind,
@@ -67,6 +69,8 @@ fn main() {
         menu::MenuPlugin,
         my_ldtk::MyLdtkPlugin,
         root::RootPlugin,
+        save::SavePlugin,
+        sound::SoundPlugin,
         state::StatePlugin,
     ));
 

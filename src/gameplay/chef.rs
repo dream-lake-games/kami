@@ -25,31 +25,9 @@ struct ChefConsts {
     cake_slide_speed: f32,
     air_drag_speed: f32,
     lift_mul: f32,
+    sound_min_speed: f32,
+    sound_max_speed: f32,
 }
-// // These are good, but a bit too fast. Makes the game too hard, esp on web builds with less consistent fps
-// impl Default for ChefConsts {
-//     fn default() -> Self {
-//         Self {
-//             min_launch_speed: 5.0,
-//             max_launch_speed: 100.0,
-//             gravity: 100.0,
-//             max_speed: 300.0,
-//             stop_speed_cutoff: 8.0,
-//             stop_sleep_time: 0.5,
-//             dirt_rough_par_mul: 0.7,
-//             dirt_rough_perp_mul: 0.4,
-//             dirt_rough_slide_speed: 80.0,
-//             dirt_smooth_par_mul: 0.95,
-//             dirt_smooth_perp_mul: 0.3,
-//             dirt_smooth_slide_speed: 10.0,
-//             cake_par_mul: 0.5,
-//             cake_perp_mul: 0.2,
-//             cake_slide_speed: 120.0,
-//             air_drag_speed: 2.0,
-//             lift_mul: 4.5,
-//         }
-//     }
-// }
 impl Default for ChefConsts {
     fn default() -> Self {
         Self {
@@ -69,7 +47,9 @@ impl Default for ChefConsts {
             cake_perp_mul: 0.2,
             cake_slide_speed: 120.0,
             air_drag_speed: 2.0,
-            lift_mul: 3.06,
+            lift_mul: 2.5,
+            sound_min_speed: 12.0,
+            sound_max_speed: 75.0,
         }
     }
 }
@@ -85,6 +65,7 @@ pub struct Chef {
     stopped_time: f32,
     was_sliding_last_frame: bool,
     current_lift: Option<CurrentLift>,
+    time_since_z: f32,
 }
 
 /// I'm too bundle-pilled
@@ -100,7 +81,6 @@ struct ChefBundle {
     dyno: Dyno,
     srx: StaticRx,
     trx: TriggerRx,
-    ttx: TriggerTx,
     anim: AnimMan<ChefAnim>,
 }
 impl ChefBundle {
@@ -119,13 +99,13 @@ impl ChefBundle {
                 stopped_time: 0.0,
                 was_sliding_last_frame: false,
                 current_lift: None,
+                time_since_z: 0.7,
             },
             pos: my_pos,
             transform: my_pos.to_transform(ZIX_CHEF + 1.0 / (order as f32 + 1.0)),
             dyno: default(),
             srx: StaticRx::single(StaticRxKind::Default, hbox.clone()),
             trx: TriggerRx::single(TriggerRxKind::Chef, hbox.clone()),
-            ttx: TriggerTx::single(TriggerTxKind::Chef, hbox.clone()),
             anim: AnimMan::default(),
         }
     }
@@ -197,7 +177,10 @@ fn maybe_spawn_chefs(
     chef_start.needs_spawn = 0;
 }
 
-fn maybe_promote_chef(mut all_chefs: Query<(&mut AnimMan<ChefAnim>, &Chef, &mut Pos)>) {
+fn maybe_promote_chef(
+    mut all_chefs: Query<(&mut AnimMan<ChefAnim>, &Chef, &mut Pos, &mut Transform)>,
+    mut bullet_time: ResMut<BulletTime>,
+) {
     if all_chefs
         .iter()
         .any(|thing| is_active_anim(thing.0.get_state()))
@@ -214,6 +197,10 @@ fn maybe_promote_chef(mut all_chefs: Query<(&mut AnimMan<ChefAnim>, &Chef, &mut 
         return;
     };
     next_up.0.set_state(ChefAnim::Ready);
+    next_up.3.translation.z = ZIX_CHEF + 1.0 + next_up.1.order as f32 / 10.0;
+
+    bullet_time.clear_effects();
+    bullet_time.set_base(BulletTimeSpeed::Normal);
 
     let needs_shift = next_up.1.order > 0;
     if needs_shift {
@@ -226,7 +213,15 @@ fn maybe_promote_chef(mut all_chefs: Query<(&mut AnimMan<ChefAnim>, &Chef, &mut 
     }
 }
 
-fn maybe_start_charge(mut chef_q: Query<&mut AnimMan<ChefAnim>>, butt_input: Res<ButtInput>) {
+#[derive(Component)]
+struct ChargeSoundEffect;
+
+fn maybe_start_charge(
+    mut chef_q: Query<&mut AnimMan<ChefAnim>>,
+    butt_input: Res<ButtInput>,
+    mut commands: Commands,
+    detail_root: Res<LevelDetailRoot>,
+) {
     if !butt_input.just_pressed(ButtKind::A) {
         return;
     }
@@ -238,6 +233,13 @@ fn maybe_start_charge(mut chef_q: Query<&mut AnimMan<ChefAnim>>, butt_input: Res
         return;
     };
     ready_chef.set_state(ChefAnim::Charge);
+    commands
+        .spawn((
+            Name::new("ChargeSound1"),
+            ChargeSoundEffect,
+            SoundEffect::ChefCharge1,
+        ))
+        .set_parent(detail_root.eid());
 }
 
 fn maybe_update_charge(
@@ -245,6 +247,9 @@ fn maybe_update_charge(
     butt_input: Res<ButtInput>,
     time: Res<Time>,
     consts: Res<ChefConsts>,
+    charge_sound: Query<Entity, With<ChargeSoundEffect>>,
+    mut commands: Commands,
+    detail_root: Res<LevelDetailRoot>,
 ) {
     let Some(mut charging_chef) = chef_q
         .iter_mut()
@@ -255,6 +260,15 @@ fn maybe_update_charge(
     };
     if butt_input.pressed(ButtKind::A) {
         charging_chef.1.charge_time += time.delta_secs();
+        if charge_sound.is_empty() {
+            commands
+                .spawn((
+                    Name::new("ChargeSound2"),
+                    ChargeSoundEffect,
+                    SoundEffect::ChefCharge2,
+                ))
+                .set_parent(detail_root.eid());
+        }
     } else {
         let max_time = 1.0;
         let ratio = charging_chef.1.charge_time.min(max_time).max(0.0);
@@ -262,6 +276,14 @@ fn maybe_update_charge(
             consts.min_launch_speed + (consts.max_launch_speed - consts.min_launch_speed) * ratio;
         charging_chef.2.vel.x = speed;
         charging_chef.0.set_state(ChefAnim::Drop);
+        commands
+            .spawn(SoundEffect::ChefLaunch)
+            .set_parent(detail_root.eid());
+        for eid in &charge_sound {
+            if let Some(mut comms) = commands.get_entity(eid) {
+                comms.despawn();
+            }
+        }
     }
 }
 
@@ -289,6 +311,8 @@ fn maybe_update_flight(
     mut bullet_time: ResMut<BulletTime>,
     consts: Res<ChefConsts>,
     static_colls: Res<StaticColls>,
+    mut commands: Commands,
+    detail_root: Res<LevelDetailRoot>,
 ) {
     let Some(mut flying_chef) = chef_q
         .iter_mut()
@@ -302,24 +326,27 @@ fn maybe_update_flight(
     // Ground collisions
     let mut is_sliding_this_frame = false;
     for coll in &my_colls {
-        let (par_mul, perp_mul, slide_speed) = match coll.tx_hbox {
+        let (par_mul, perp_mul, slide_speed, se) = match coll.tx_hbox {
             HBOX_DIRT_ROUGH => {
                 // So uhhhhh didn't I make a library to do this...? Lol
                 (
                     consts.dirt_rough_par_mul,
                     consts.dirt_rough_perp_mul,
                     consts.dirt_rough_slide_speed,
+                    SoundEffect::ImpactDirtRough,
                 )
             }
             HBOX_DIRT_SMOOTH => (
                 consts.dirt_smooth_par_mul,
                 consts.dirt_smooth_perp_mul,
                 consts.dirt_smooth_slide_speed,
+                SoundEffect::ImpactDirtSmooth,
             ),
             HBOX_CAKE_GREEN | HBOX_CAKE_BLUE | HBOX_CAKE_PINK | HBOX_CAKE_RED => (
                 consts.cake_par_mul,
                 consts.cake_perp_mul,
                 consts.cake_slide_speed,
+                SoundEffect::ImpactCake,
             ),
             _ => {
                 #[cfg(debug_assertions)]
@@ -327,6 +354,39 @@ fn maybe_update_flight(
                 continue;
             }
         };
+
+        if coll.push.x != 0.0
+            && flying_chef.1.vel.x.abs() > consts.stop_speed_cutoff
+            && flying_chef.3.was_sliding_last_frame
+            && coll.push.x.signum() == flying_chef.1.vel.x.signum()
+        {
+            // Probably a bugged collision
+            continue;
+        }
+
+        let perp_sound_mult = (coll
+            .rx_perp
+            .length()
+            .clamp(consts.sound_min_speed, consts.sound_max_speed)
+            - consts.sound_min_speed)
+            / (consts.sound_max_speed - consts.sound_min_speed);
+        if perp_sound_mult > 0.1 {
+            commands
+                .spawn((se, SoundMult(perp_sound_mult)))
+                .set_parent(detail_root.eid());
+        } else if flying_chef.3.was_sliding_last_frame {
+            let par_sound_mult = (coll
+                .rx_par
+                .length()
+                .clamp(consts.sound_min_speed, consts.sound_max_speed)
+                - consts.sound_min_speed)
+                / (consts.sound_max_speed - consts.sound_min_speed);
+            commands.spawn((
+                SoundEffect::ImpactSmoothSlide,
+                SoundMult(par_sound_mult),
+                OneSound::Ignore,
+            ));
+        }
 
         if flying_chef.3.was_sliding_last_frame && coll.push.y > 0.0 {
             let decrease_by = slide_speed * bullet_time.delta_secs();
@@ -337,6 +397,12 @@ fn maybe_update_flight(
             }
         } else {
             flying_chef.1.vel = coll.rx_par * par_mul - coll.rx_perp * perp_mul;
+        }
+        if flying_chef.1.vel.x.abs() < 0.05
+            && coll.push.x.abs() > 0.0
+            && !flying_chef.3.was_sliding_last_frame
+        {
+            flying_chef.1.vel.x = coll.push.x.signum() * 6.0;
         }
 
         is_sliding_this_frame = is_sliding_this_frame || coll.push.y > 0.0;
@@ -457,12 +523,15 @@ fn maybe_end_flight(
         &mut Chef,
         &StaticRx,
         &mut Pos,
+        &mut Transform,
     )>,
     consts: Res<ChefConsts>,
-    bullet_time: Res<BulletTime>,
+    mut bullet_time: ResMut<BulletTime>,
     static_colls: Res<StaticColls>,
     mut level_state: ResMut<LevelState>,
     pos_q: Query<&Pos, Without<AnimMan<ChefAnim>>>,
+    mut commands: Commands,
+    root: Res<LevelDetailRoot>,
 ) {
     let Some(mut flying_chef) = chef_q
         .iter_mut()
@@ -471,6 +540,22 @@ fn maybe_end_flight(
     else {
         return;
     };
+
+    let way_oob_dist = 20.0;
+    let chef_pos = flying_chef.4.clone();
+    let x_way_oob = chef_pos.x + way_oob_dist < level_state.rect.min.x
+        || chef_pos.x - way_oob_dist > level_state.rect.max.x;
+    // NOTE: "Too high" is intentionally not oob
+    let y_way_oob = chef_pos.y + way_oob_dist < level_state.rect.min.y;
+    if x_way_oob || y_way_oob {
+        // TODO: This should count as a death
+        flying_chef.1.vel = Vec2::ZERO;
+        flying_chef.0.set_state(ChefAnim::Sleep);
+        bullet_time.clear_effects();
+        bullet_time.set_base(BulletTimeSpeed::Normal);
+        return;
+    }
+
     let above_colls = static_colls
         .get_refs(&flying_chef.3.coll_keys)
         .into_iter()
@@ -482,6 +567,9 @@ fn maybe_end_flight(
         flying_chef.2.stopped_time = 0.0;
     }
     if flying_chef.2.stopped_time > consts.stop_sleep_time {
+        bullet_time.clear_effects();
+        bullet_time.set_base(BulletTimeSpeed::Normal);
+
         flying_chef.1.vel = Vec2::ZERO;
         flying_chef.0.set_state(ChefAnim::Sleep);
         let new_flip_x = flying_chef.0.get_flip_y();
@@ -497,21 +585,39 @@ fn maybe_end_flight(
         };
         let block_pos = pos_q.get(above_coll.tx_ctrl).unwrap();
         flying_chef.4.x = flying_chef.4.x.clamp(block_pos.x - 4.0, block_pos.x + 4.0);
+        let mut spawn_score = |anim: ScoreAnim, se: SoundEffect| {
+            commands
+                .spawn((
+                    EphemeralAnim::new(
+                        anim,
+                        false,
+                        flying_chef.4.clone().translated(Vec2::Y * 18.0),
+                        ZIX_CHEF + 5.0,
+                    ),
+                    se,
+                ))
+                .set_parent(root.eid());
+        };
         match above_coll.tx_hbox {
             HBOX_CAKE_GREEN => {
                 level_state.score -= 100;
+                spawn_score(ScoreAnim::N100, SoundEffect::ScoreN100);
             }
             HBOX_CAKE_BLUE => {
                 level_state.score += 100;
+                spawn_score(ScoreAnim::P100, SoundEffect::ScoreP100);
             }
             HBOX_CAKE_PINK => {
                 level_state.score += 200;
+                spawn_score(ScoreAnim::P200, SoundEffect::ScoreP200);
             }
             HBOX_CAKE_RED => {
-                level_state.score += 400;
+                level_state.score += 300;
+                spawn_score(ScoreAnim::P300, SoundEffect::ScoreP300);
             }
             _ => (),
         }
+        flying_chef.5.translation.z = ZIX_CHEF + flying_chef.2.order as f32 / 10.0;
     }
 }
 
@@ -520,6 +626,8 @@ fn maybe_show_end(
     mut contexts: EguiContexts,
     mut commands: Commands,
     level_state: Res<LevelState>,
+    mut save_data: ResMut<Pers<SaveData>>,
+    mut store: ResMut<PkvStore>,
 ) {
     let at_end = chef_q
         .iter()
@@ -527,6 +635,51 @@ fn maybe_show_end(
     if !at_end {
         return;
     }
+    if save_data
+        .get()
+        .map
+        .get(&level_state.lid)
+        .cloned()
+        .unwrap_or_default()
+        .hiscore
+        .unwrap_or(-1000000)
+        < level_state.score
+    {
+        let mut new_map = save_data.get().map.clone();
+        new_map.insert(
+            level_state.lid.clone(),
+            LevelSave {
+                hiscore: Some(level_state.score),
+            },
+        );
+        let old = save_data.get().clone();
+        save_data.set(SaveData {
+            map: new_map,
+            ..old
+        });
+        save_data.save(&mut store);
+    }
+    let this_level_ix = LEVEL_DEFNS
+        .iter()
+        .position(|level_defn| level_defn.lid == level_state.lid)
+        .unwrap();
+    if save_data.get().menu_ix as usize != this_level_ix {
+        let old = save_data.get().clone();
+        save_data.set(SaveData {
+            menu_ix: this_level_ix as u32,
+            ..old
+        });
+        save_data.save(&mut store);
+    }
+
+    let hiscore = save_data
+        .get()
+        .map
+        .get(&level_state.lid)
+        .cloned()
+        .unwrap_or_default()
+        .hiscore
+        .unwrap_or(level_state.score);
 
     let level_defn = get_level_defn(&level_state.lid);
 
@@ -548,7 +701,7 @@ fn maybe_show_end(
                 ui.add_space(vspacing);
                 ui.heading("SCORE");
                 ui.label(level_state.score.to_string());
-                ui.small(format!("HI: 100"));
+                ui.small(format!("HI: {hiscore}"));
                 ui.add_space(vspacing);
                 ui.vertical(|ui| {
                     render_tier_grid(ui, force_width, &level_defn.tiers, None);
@@ -581,6 +734,66 @@ fn maybe_show_end(
         });
 }
 
+fn juice_trails(
+    chef_q: Query<(&Pos, &AnimMan<ChefAnim>)>,
+    mut commands: Commands,
+    root: Res<LevelDetailRoot>,
+) {
+    for chef in &chef_q {
+        match chef.1.get_state() {
+            ChefAnim::Drop | ChefAnim::Lift => {
+                commands
+                    .spawn(EphemeralAnim::new(
+                        ChefTrailAlwaysAnim::Disappear,
+                        false,
+                        chef.0.clone(),
+                        ZIX_CHEF - 1.0,
+                    ))
+                    .set_parent(root.eid());
+                if chef.1.get_state() == ChefAnim::Lift {
+                    commands
+                        .spawn(EphemeralAnim::new(
+                            ChefTrailLiftAnim::rand(),
+                            false,
+                            chef.0.clone(),
+                            ZIX_CHEF - 0.1,
+                        ))
+                        .set_parent(root.eid());
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn juice_sleeping(
+    mut chefs: Query<(&AnimMan<ChefAnim>, &Pos, &mut Chef)>,
+    mut commands: Commands,
+    bullet_time: Res<BulletTime>,
+    detail_root: Res<LevelDetailRoot>,
+) {
+    for (anim, pos, mut chef) in chefs
+        .iter_mut()
+        .filter(|thing| thing.0.get_state() == ChefAnim::Sleep)
+    {
+        chef.time_since_z += bullet_time.delta_secs() * thread_rng().gen_range(0.8..1.2);
+        if chef.time_since_z > 1.0 {
+            chef.time_since_z = 0.0;
+            let real_pos = pos.translated(Vec2::new(
+                10.0 * if anim.get_flip_x() { -1.0 } else { 1.0 },
+                6.0,
+            ));
+            commands
+                .spawn((
+                    real_pos.clone(),
+                    Dyno::new(thread_rng().gen_range(-10.0..10.0), 10.0),
+                    EphemeralAnim::new(ZAnim::Rise, false, real_pos, ZIX_CHEF + 1.0),
+                ))
+                .set_parent(detail_root.eid());
+        }
+    }
+}
+
 pub(super) fn register_chefs(app: &mut App) {
     app.add_plugins(MyLdtkEntityPlugin::<ChefStartBundle>::new(
         "Entities",
@@ -602,6 +815,17 @@ pub(super) fn register_chefs(app: &mut App) {
             maybe_end_flight,
             maybe_show_end,
         )
+            .chain()
+            .run_if(in_state(MetaState::Level))
+            .run_if(physics_active)
+            .after(InputSet)
+            .after(PhysicsSet)
+            .after(egui_always_helpers),
+    );
+
+    app.add_systems(
+        Update,
+        (juice_trails, juice_sleeping)
             .chain()
             .run_if(in_state(MetaState::Level))
             .run_if(physics_active)

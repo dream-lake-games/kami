@@ -20,7 +20,7 @@ impl LevelIntroMessage {
     }
 }
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Debug)]
 pub struct LevelState {
     pub lid: String,
     pub paused: bool,
@@ -64,15 +64,9 @@ impl LevelDefn {
     }
 }
 
-#[derive(Resource, Reflect, Serialize, Deserialize)]
+#[derive(Resource, Reflect, Serialize, Deserialize, Default, Clone)]
 pub struct LevelSave {
-    pub high_score: Option<i32>,
-}
-
-#[derive(Resource, Reflect, Serialize, Deserialize)]
-pub struct SaveData {
-    /// Maps lid to LevelSave
-    pub map: HashMap<String, LevelSave>,
+    pub hiscore: Option<i32>,
 }
 
 pub fn physics_active(level_state: Option<Res<LevelState>>) -> bool {
@@ -81,6 +75,7 @@ pub fn physics_active(level_state: Option<Res<LevelState>>) -> bool {
         .unwrap_or(false)
 }
 
+#[expect(dead_code)]
 pub fn physics_inactive(level_state: Option<Res<LevelState>>) -> bool {
     !physics_active(level_state)
 }

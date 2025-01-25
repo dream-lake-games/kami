@@ -1,3 +1,5 @@
+use bevy::tasks::AsyncComputeTaskPool;
+
 use crate::prelude::*;
 
 #[derive(Resource, Debug, Default, Reflect)]
@@ -189,8 +191,9 @@ pub fn menu_ui(
     mut contexts: EguiContexts,
     mut menu_state: ResMut<MenuState>,
     mut commands: Commands,
-    mut level_ix: Local<usize>,
     loading_anim: Query<&AnimMan<LoadingAnim>>,
+    mut save_data: ResMut<Pers<SaveData>>,
+    mut store: ResMut<PkvStore>,
 ) {
     if loading_anim
         .iter()
@@ -201,9 +204,26 @@ pub fn menu_ui(
 
     let ctx = contexts.ctx_mut();
 
-    let can_dec_level_ix = *level_ix > 0;
-    let can_inc_level_ix = *level_ix + 1 < LEVEL_DEFNS.len();
-    let current_level = &LEVEL_DEFNS[*level_ix];
+    let current_level_ix = save_data.get().menu_ix;
+    let can_dec_level_ix = current_level_ix > 0;
+    let can_inc_level_ix = current_level_ix + 1 < LEVEL_DEFNS.len() as u32;
+    let current_level = &LEVEL_DEFNS[save_data.get().menu_ix as usize];
+    let current_hiscore_str = save_data
+        .get()
+        .map
+        .get(&current_level.lid)
+        .cloned()
+        .unwrap_or_default()
+        .hiscore
+        .map(|num| format!("{num}"))
+        .unwrap_or("NONE".to_string());
+
+    let mut update_level_ix = |diff: i32| {
+        let old = save_data.get().clone();
+        let menu_ix = (save_data.get().menu_ix as i32 + diff) as u32;
+        save_data.set(SaveData { menu_ix, ..old });
+        save_data.save(&mut store);
+    };
 
     egui::CentralPanel::default()
         .frame(egui::Frame::none())
@@ -250,9 +270,13 @@ pub fn menu_ui(
                             ui.set_max_height(screen_size.y / 3.0);
                             ui.vertical_centered(|ui| {
                                 ui.label(&current_level.name);
-                                ui.small(format!("({} / {})", *level_ix + 1, LEVEL_DEFNS.len()));
+                                ui.small(format!(
+                                    "({} / {})",
+                                    current_level_ix + 1,
+                                    LEVEL_DEFNS.len()
+                                ));
                                 ui.add_space(vspacing);
-                                ui.label("HISCORE: 1400");
+                                ui.label(format!("HISCORE: {current_hiscore_str}"));
                             });
                             ui.add_space(vspacing);
                             render_tier_grid(ui, force_width, &current_level.tiers, None);
@@ -267,7 +291,7 @@ pub fn menu_ui(
                                     )
                                     .clicked()
                                 {
-                                    *level_ix -= 1;
+                                    update_level_ix(-1);
                                 }
                             });
                             ui.add_enabled_ui(can_inc_level_ix, |ui| {
@@ -278,7 +302,7 @@ pub fn menu_ui(
                                     )
                                     .clicked()
                                 {
-                                    *level_ix += 1;
+                                    update_level_ix(1);
                                 }
                             });
                         });

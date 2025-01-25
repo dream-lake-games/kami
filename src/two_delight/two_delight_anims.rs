@@ -26,6 +26,37 @@ impl AnimTimeProvider for AnimTimeRes {
     }
 }
 
+#[derive(Component)]
+pub(super) struct AgeBack;
+#[derive(Bundle)]
+pub struct EphemeralAnim<StateMachine: AnimStateMachine> {
+    name: Name,
+    anim: AnimMan<StateMachine>,
+    transform: Transform,
+    visibility: Visibility,
+    age_back: AgeBack,
+}
+impl<StateMachine: AnimStateMachine> EphemeralAnim<StateMachine> {
+    pub fn new(anim: StateMachine, flip_x: bool, pos: Pos, zix: f32) -> Self {
+        Self {
+            name: Name::new("ephemeral anim"),
+            anim: AnimMan::new(anim).with_flip_x(flip_x),
+            transform: pos.to_transform(zix),
+            visibility: Visibility::Visible,
+            age_back: AgeBack,
+        }
+    }
+}
+
+pub(super) fn age_ephemeral_anims_back(
+    mut anims: Query<&mut Transform, With<AgeBack>>,
+    bullet_time: Res<BulletTime>,
+) {
+    for mut tran in &mut anims {
+        tran.translation.z -= bullet_time.delta_secs() * 0.1;
+    }
+}
+
 pub(super) fn drive_anim_time_res(
     mut anim_time: ResMut<AnimTimeRes>,
     bullet_time: Res<BulletTime>,

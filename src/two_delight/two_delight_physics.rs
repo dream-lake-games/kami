@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(std::hash::Hash, Debug, Clone)]
+#[derive(std::hash::Hash, Debug, Clone, PartialEq, Eq)]
 pub enum TriggerRxKind {
     Chef,
 }
@@ -8,7 +8,7 @@ impl TriggerKind for TriggerRxKind {}
 
 #[derive(std::hash::Hash, Debug, Clone, PartialEq, Eq)]
 pub enum TriggerTxKind {
-    Chef,
+    Acorn,
 }
 impl TriggerKind for TriggerTxKind {}
 

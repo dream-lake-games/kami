@@ -25,6 +25,7 @@ impl Plugin for MyLdtkPlugin {
 
         app.add_plugins(LdtkPlugin).insert_resource(LdtkSettings {
             level_spawn_behavior: LevelSpawnBehavior::UseZeroTranslation,
+            level_background: LevelBackground::Nonexistent,
             ..default()
         });
     }

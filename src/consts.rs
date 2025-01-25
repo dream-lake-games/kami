@@ -18,6 +18,7 @@ pub const TAU: f32 = std::f32::consts::TAU;
 
 /// Gameplay zixes
 pub const ZIX_CHEF: f32 = 50.0;
+pub const ZIX_ITEMS: f32 = 40.0;
 
 /// Marked hboxes (hacking and totally arbitrary bc I forgot which (if any) numbers have special meaning whoops)
 pub const HBOX_CAKE_GREEN: HBoxMarker = 10;

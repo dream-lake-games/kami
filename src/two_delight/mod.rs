@@ -19,6 +19,9 @@ impl Default for Framepace {
     fn default() -> Self {
         Framepace {
             fps_limit: 30.0,
+            #[cfg(debug_assertions)]
+            active: true,
+            #[cfg(not(debug_assertions))]
             active: false,
         }
     }
@@ -64,6 +67,7 @@ impl Plugin for TwoDelightPlugin {
                 .with_default_render_layers(DEFAULT_ANIM_RENDER_LAYERS)
                 .with_default_time_class(DEFAULT_ANIM_TIME_CLASS),
         );
+        app.add_systems(Update, age_ephemeral_anims_back.before(AnimSet));
         app.add_systems(PostUpdate, drive_anim_time_res.before(AnimSet));
 
         // Physics

@@ -13,8 +13,8 @@ pub enum MetaState {
 }
 
 fn hack_past_setup(mut commands: Commands) {
-    // commands.trigger(LoadMenu::kind(MenuKind::Title));
-    commands.trigger(LoadLevel::lid("6dab9440-c210-11ef-ab00-79b1690c4bfe"));
+    commands.trigger(LoadMenu::kind(MenuKind::Title));
+    // commands.trigger(LoadLevel::lid("cdadbba0-c210-11ef-a5df-bd1eec6b98a9"));
 }
 
 pub(super) struct StatePlugin;
