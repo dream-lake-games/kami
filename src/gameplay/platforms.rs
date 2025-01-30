@@ -36,9 +36,30 @@ impl MyLdtkIntCellValue for DirtSmoothBundle {
     }
 }
 
+#[derive(Bundle)]
+struct SpikesBundle {
+    name: Name,
+    pos: Pos,
+    ttx: TriggerTx,
+}
+impl MyLdtkIntCellValue for SpikesBundle {
+    type Root = LevelPlatformRoot;
+    fn from_ldtk(pos: Pos, _value: i32) -> Self {
+        let hbox = HBox::new(5, 5);
+        Self {
+            name: Name::new("Spikes"),
+            pos,
+            ttx: TriggerTx::single(TriggerTxKind::Spikes, hbox),
+        }
+    }
+}
+
 pub(super) fn register_platforms(app: &mut App) {
     MyLdtkIntCellLayer::new("DirtStatic", MainStaticLayer).register(app);
     MyLdtkIntCellLayer::new("DirtDetail", MainStaticLayer).register(app);
+    MyLdtkIntCellLayer::new("DirtAmbience", MainAmbienceLayer).register(app);
+    MyLdtkIntCellLayer::new("DirtAmbienceAutoAmbience", MainAmbienceLayer).register(app);
+    MyLdtkIntCellLayer::new("DirtAmbienceAutoDetail", MainDetailLayer).register(app);
 
     app.add_plugins(MyLdtkIntCellValuePlugin::<DirtRoughBundle>::multiple(
         "DirtStatic",
@@ -47,5 +68,12 @@ pub(super) fn register_platforms(app: &mut App) {
     app.add_plugins(MyLdtkIntCellValuePlugin::<DirtSmoothBundle>::multiple(
         "DirtStatic",
         vec![3],
+    ));
+
+    MyLdtkIntCellLayer::new("SpikesStatic", MainStaticLayer).register(app);
+
+    app.add_plugins(MyLdtkIntCellValuePlugin::<SpikesBundle>::single(
+        "SpikesStatic",
+        1,
     ));
 }

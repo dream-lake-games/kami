@@ -82,6 +82,7 @@ struct ChefBundle {
     srx: StaticRx,
     trx: TriggerRx,
     anim: AnimMan<ChefAnim>,
+    light: LightMan<Light128Anim>,
 }
 impl ChefBundle {
     const LINE_GAP: f32 = 10.0;
@@ -107,6 +108,7 @@ impl ChefBundle {
             srx: StaticRx::single(StaticRxKind::Default, hbox.clone()),
             trx: TriggerRx::single(TriggerRxKind::Chef, hbox.clone()),
             anim: AnimMan::default(),
+            light: LightMan::new(Light128Anim::None),
         }
     }
 }
@@ -178,7 +180,13 @@ fn maybe_spawn_chefs(
 }
 
 fn maybe_promote_chef(
-    mut all_chefs: Query<(&mut AnimMan<ChefAnim>, &Chef, &mut Pos, &mut Transform)>,
+    mut all_chefs: Query<(
+        &mut AnimMan<ChefAnim>,
+        &Chef,
+        &mut Pos,
+        &mut Transform,
+        &mut LightMan<Light128Anim>,
+    )>,
     mut bullet_time: ResMut<BulletTime>,
 ) {
     if all_chefs
@@ -197,6 +205,7 @@ fn maybe_promote_chef(
         return;
     };
     next_up.0.set_state(ChefAnim::Ready);
+    next_up.4.set_state(Light128Anim::Grow);
     next_up.3.translation.z = ZIX_CHEF + 1.0 + next_up.1.order as f32 / 10.0;
 
     bullet_time.clear_effects();
@@ -281,7 +290,7 @@ fn maybe_update_charge(
             .set_parent(detail_root.eid());
         for eid in &charge_sound {
             if let Some(mut comms) = commands.get_entity(eid) {
-                comms.despawn();
+                comms.try_despawn();
             }
         }
     }
@@ -354,11 +363,23 @@ fn maybe_update_flight(
                 continue;
             }
         };
+        let (part_color, part_num, part_size) = match coll.tx_hbox {
+            HBOX_DIRT_ROUGH => (RGC5, 2, 3),
+            HBOX_DIRT_SMOOTH => (RGC4, 2, 3),
+            HBOX_CAKE_GREEN => (RGC4, 4, 6),
+            HBOX_CAKE_BLUE => (RGC4, 4, 6),
+            HBOX_CAKE_PINK => (RGC3, 4, 6),
+            HBOX_CAKE_RED => (RGC2, 4, 6),
+            _ => (RGC5, 2, 3),
+        };
 
-        if coll.push.x != 0.0
+        if (coll.push.x != 0.0
             && flying_chef.1.vel.x.abs() > consts.stop_speed_cutoff
             && flying_chef.3.was_sliding_last_frame
-            && coll.push.x.signum() == flying_chef.1.vel.x.signum()
+            && coll.push.x.signum() == flying_chef.1.vel.x.signum())
+            || (coll.push.y != 0.0
+                && flying_chef.1.vel.y.abs() > consts.stop_speed_cutoff
+                && coll.push.y.signum() == flying_chef.1.vel.y.signum())
         {
             // Probably a bugged collision
             flying_chef.1.vel = coll.rx_perp + coll.rx_par;
@@ -375,6 +396,22 @@ fn maybe_update_flight(
             commands
                 .spawn((se, SoundMult(perp_sound_mult)))
                 .set_parent(detail_root.eid());
+            let base_part_dyno = (coll.rx_par - coll.rx_perp) * 0.5;
+            for _ in 0..part_num {
+                let part_dyno = Vec2::new(
+                    base_part_dyno.x + thread_rng().gen_range(-20.0..20.0),
+                    base_part_dyno.y + thread_rng().gen_range(-20.0..20.0),
+                );
+                commands
+                    .spawn(
+                        ParticleBundle::new(coll.rx_pos)
+                            .with_color(part_color)
+                            .with_zix(ZIX_CHEF + 5.0)
+                            .with_dyno(part_dyno.x, part_dyno.y)
+                            .with_size(part_size as f32),
+                    )
+                    .set_parent(detail_root.eid());
+            }
         } else if flying_chef.3.was_sliding_last_frame {
             let par_sound_mult = (coll
                 .rx_par
@@ -525,10 +562,13 @@ fn maybe_end_flight(
         &StaticRx,
         &mut Pos,
         &mut Transform,
+        &mut LightMan<Light128Anim>,
+        &TriggerRx,
     )>,
     consts: Res<ChefConsts>,
     mut bullet_time: ResMut<BulletTime>,
     static_colls: Res<StaticColls>,
+    trigger_colls: Res<TriggerColls>,
     mut level_state: ResMut<LevelState>,
     pos_q: Query<&Pos, Without<AnimMan<ChefAnim>>>,
     mut commands: Commands,
@@ -552,6 +592,7 @@ fn maybe_end_flight(
         // TODO: This should count as a death
         flying_chef.1.vel = Vec2::ZERO;
         flying_chef.0.set_state(ChefAnim::Sleep);
+        flying_chef.6.set_state(Light128Anim::Shrink);
         bullet_time.clear_effects();
         bullet_time.set_base(BulletTimeSpeed::Normal);
         return;
@@ -573,6 +614,7 @@ fn maybe_end_flight(
 
         flying_chef.1.vel = Vec2::ZERO;
         flying_chef.0.set_state(ChefAnim::Sleep);
+        flying_chef.6.set_state(Light128Anim::Shrink);
         let new_flip_x = flying_chef.0.get_flip_y();
         flying_chef.0.set_flip_x(new_flip_x);
         flying_chef.0.set_flip_y(false);
@@ -617,6 +659,17 @@ fn maybe_end_flight(
             _ => (),
         }
         flying_chef.5.translation.z = ZIX_CHEF + flying_chef.2.order as f32 / 10.0;
+    }
+
+    if trigger_colls
+        .get_refs(&flying_chef.7.coll_keys)
+        .iter()
+        .any(|coll| coll.tx_kind == TriggerTxKind::Spikes)
+    {
+        // Should explode
+        flying_chef.0.set_state(ChefAnim::Explode);
+        flying_chef.1.vel *= 0.2;
+        commands.spawn(SoundEffect::Death);
     }
 }
 
@@ -753,29 +806,19 @@ fn juice_trails(
     root: Res<LevelDetailRoot>,
 ) {
     for chef in &chef_q {
-        match chef.1.get_state() {
-            ChefAnim::Drop | ChefAnim::Lift => {
-                commands
-                    .spawn(EphemeralAnim::new(
-                        ChefTrailAlwaysAnim::Disappear,
-                        false,
-                        chef.0.clone(),
-                        ZIX_CHEF - 1.0,
-                    ))
-                    .set_parent(root.eid());
-                if chef.1.get_state() == ChefAnim::Lift {
-                    commands
-                        .spawn(EphemeralAnim::new(
-                            ChefTrailLiftAnim::rand(),
-                            false,
-                            chef.0.clone(),
-                            ZIX_CHEF - 0.1,
-                        ))
-                        .set_parent(root.eid());
-                }
-            }
-            _ => {}
-        }
+        let (part_size, part_color, part_lifespan) = match chef.1.get_state() {
+            ChefAnim::Drop => (4, RGC2, 0.6),
+            ChefAnim::Lift => (6, RGC1, 0.8),
+            _ => continue,
+        };
+        commands
+            .spawn(
+                ParticleBundle::new(chef.0.clone())
+                    .with_color(part_color)
+                    .with_size(part_size as f32)
+                    .with_lifespan(part_lifespan),
+            )
+            .set_parent(root.eid());
     }
 }
 

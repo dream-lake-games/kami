@@ -9,6 +9,7 @@ impl TriggerKind for TriggerRxKind {}
 #[derive(std::hash::Hash, Debug, Clone, PartialEq, Eq)]
 pub enum TriggerTxKind {
     Acorn,
+    Spikes,
 }
 impl TriggerKind for TriggerTxKind {}
 

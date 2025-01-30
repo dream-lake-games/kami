@@ -53,7 +53,7 @@ lazy_static::lazy_static! {
             "FIRST LOOP",
             "d90776d0-c210-11ef-a5df-5b73bfd4e193",
             vec![],
-            LevelTierCutoff::new(300, 600, 900),
+            LevelTierCutoff::new(200, 400, 600),
         ),
         // SECOND ROW OF SIXZ
         LevelDefn::new(

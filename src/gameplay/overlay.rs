@@ -193,6 +193,13 @@ fn pause_menu(
                 ui.style_mut().visuals.override_text_color = Some(EGC8);
                 ui.add_space(vspacing);
                 if ui
+                    .add_sized(control_butt_size(), egui::Button::new("RESUME"))
+                    .clicked()
+                {
+                    commands.spawn(SoundEffect::MenuClick);
+                    level_state.paused = false;
+                }
+                if ui
                     .add_sized(control_butt_size(), egui::Button::new("RETRY"))
                     .clicked()
                 {

@@ -39,3 +39,13 @@ pub const EGC3: Color32 = Color32::from_rgb(199, 120, 111);
 pub const EGC6: Color32 = Color32::from_rgb(59, 64, 94);
 pub const EGC7: Color32 = Color32::from_rgb(46, 42, 79);
 pub const EGC8: Color32 = Color32::from_rgb(33, 29, 56);
+
+/// Regular colors
+pub const RGC1: Color = Color::srgb(205.0 / 255.0, 212.0 / 255.0, 165.0 / 255.0);
+pub const RGC2: Color = Color::srgb(207.0 / 255.0, 169.0 / 255.0, 138.0 / 255.0);
+pub const RGC3: Color = Color::srgb(199.0 / 255.0, 120.0 / 255.0, 111.0 / 255.0);
+pub const RGC4: Color = Color::srgb(154.0 / 255.0, 98.0 / 255.0, 120.0 / 255.0);
+pub const RGC5: Color = Color::srgb(96.0 / 255.0, 85.0 / 255.0, 110.0 / 255.0);
+pub const RGC6: Color = Color::srgb(59.0 / 255.0, 64.0 / 255.0, 94.0 / 255.0);
+pub const RGC7: Color = Color::srgb(46.0 / 255.0, 42.0 / 255.0, 79.0 / 255.0);
+pub const RGC8: Color = Color::srgb(33.0 / 255.0, 29.0 / 255.0, 56.0 / 255.0);

@@ -9,6 +9,7 @@ mod input;
 mod level;
 mod menu;
 mod my_ldtk;
+mod particle;
 mod root;
 mod save;
 mod sound;
@@ -20,8 +21,8 @@ mod two_delight;
 #[expect(unused_imports)]
 mod prelude {
     pub use super::{
-        anim::*, bg::*, consts::*, gameplay::*, input::*, level::*, menu::*, my_ldtk::*, root::*,
-        save::*, sound::*, state::*, two_delight::*,
+        anim::*, bg::*, consts::*, gameplay::*, input::*, level::*, menu::*, my_ldtk::*,
+        particle::*, root::*, save::*, sound::*, state::*, two_delight::*,
     };
     pub use bevy::{
         color::palettes::tailwind,
@@ -68,6 +69,7 @@ fn main() {
         level::LevelPlugin,
         menu::MenuPlugin,
         my_ldtk::MyLdtkPlugin,
+        particle::ParticlePlugin,
         root::RootPlugin,
         save::SavePlugin,
         sound::SoundPlugin,

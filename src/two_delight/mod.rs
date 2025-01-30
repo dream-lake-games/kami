@@ -18,11 +18,12 @@ struct Framepace {
 impl Default for Framepace {
     fn default() -> Self {
         Framepace {
-            fps_limit: 30.0,
             #[cfg(debug_assertions)]
-            active: true,
+            fps_limit: 40.0,
             #[cfg(not(debug_assertions))]
-            active: false,
+            fps_limit: 80.0,
+            active: true,
+            // active: false,
         }
     }
 }

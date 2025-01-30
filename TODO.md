@@ -4,6 +4,17 @@
 - [x] Music
 - [x] Sound effects
 - [x] Flying trail
-- [ ] Candle mechanics
 - [x] Fix physics bug
 
+## High prio
+
+- [ ] Spikes
+- [ ] Title screen text
+- [ ] Make a good itch page
+- [ ] Basic trailer
+
+## Med prio
+
+- [ ] Air OR spring
+- [ ] Juice the score increasing
+- [ ] 

@@ -61,6 +61,14 @@ derive_anim!(
         #[render_layers(MainStaticLayer)]
         #[offset(0.0, 7.0)]
         Sleep,
+        #[file("chefs/sleep.png")]
+        #[size(24, 24)]
+        #[length(6)]
+        #[fps(5.0)]
+        #[render_layers(MainStaticLayer)]
+        #[offset(0.0, 7.0)]
+        #[next(Despawn)]
+        Explode,
     }
 );
 
@@ -182,9 +190,46 @@ derive_anim!(
     }
 );
 
+derive_anim!(
+    pub enum Light128Anim {
+        #[default]
+        #[file("none.png")]
+        #[size(1, 1)]
+        #[render_layers(LightLayer)]
+        None,
+        #[file("chefs/light_grow.png")]
+        #[size(128, 128)]
+        #[length(3)]
+        #[render_layers(LightLayer)]
+        #[next(Full)]
+        Grow,
+        #[file("chefs/light_full.png")]
+        #[size(128, 128)]
+        #[render_layers(LightLayer)]
+        Full,
+        #[file("chefs/light_shrink.png")]
+        #[size(128, 128)]
+        #[length(3)]
+        #[render_layers(LightLayer)]
+        #[next(None)]
+        Shrink,
+    }
+);
+impl LightAnim for Light128Anim {
+    fn light_radius(&self) -> Option<f32> {
+        match self {
+            Self::None => None,
+            _ => Some(64.0),
+        }
+    }
+}
+
 macro_rules! wasm_hates_wizards {
     ($($anim:ident $(,)?)+) => {
         pub(super) fn register_anim_defns(app: &mut App) {
+            // this is so bad
+            app.add_plugins(LightDefnPlugin::<Light128Anim>::default());
+
             app.add_plugins((
                 $(
                     AnimDefnPlugin::<$anim, AnimTimeRes>::default(),
