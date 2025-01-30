@@ -55,7 +55,7 @@ lazy_static::lazy_static! {
             vec![],
             LevelTierCutoff::new(200, 400, 600),
         ),
-        // SECOND ROW OF SIXZ
+        // SECOND ROW OF SIX
         LevelDefn::new(
             "SCATTERED NUTS",
             "c796e400-c210-11ef-a5df-1d1d99b5bc99",
@@ -75,19 +75,58 @@ lazy_static::lazy_static! {
             LevelTierCutoff::new(100, 250, 400),
         ),
         LevelDefn::new(
-            "CAKES IN THE FOREST",
+            "SPIKES ARE SHARP",
             "cdaa5f20-c210-11ef-a5df-3169b19bccd5",
-            vec![],
-            LevelTierCutoff::new(0, 100, 200),
+            vec![
+                LevelIntroMessage::new("CAKE IS NOT ALONE", "Someone isn't too happy about our team's surprise landings. Be careful out there.")
+            ],
+            LevelTierCutoff::new(100, 300, 550),
         ),
         LevelDefn::new(
-            "CAKES IN THE FOREST",
+            "STEADY NOW",
             "cf5046f0-c210-11ef-a5df-21b8dbce8d91",
             vec![],
+            LevelTierCutoff::new(250, 550, 750),
+        ),
+        LevelDefn::new(
+            "DAREDEVIL",
+            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
+            vec![],
+            LevelTierCutoff::new(150, 250, 350),
+        ),
+        // THIRD ROW OF SIX
+        LevelDefn::new(
+            "DAREDEVIL",
+            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
+            vec![],
             LevelTierCutoff::new(0, 100, 200),
         ),
         LevelDefn::new(
-            "CAKES IN THE FOREST",
+            "DAREDEVIL",
+            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
+            vec![],
+            LevelTierCutoff::new(0, 100, 200),
+        ),
+        LevelDefn::new(
+            "DAREDEVIL",
+            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
+            vec![],
+            LevelTierCutoff::new(0, 100, 200),
+        ),
+        LevelDefn::new(
+            "DAREDEVIL",
+            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
+            vec![],
+            LevelTierCutoff::new(0, 100, 200),
+        ),
+        LevelDefn::new(
+            "DAREDEVIL",
+            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
+            vec![],
+            LevelTierCutoff::new(0, 100, 200),
+        ),
+        LevelDefn::new(
+            "DAREDEVIL",
             "d148e2a0-c210-11ef-a5df-3114ad4182c0",
             vec![],
             LevelTierCutoff::new(0, 100, 200),

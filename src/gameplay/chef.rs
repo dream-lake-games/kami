@@ -668,7 +668,7 @@ fn maybe_end_flight(
     {
         // Should explode
         flying_chef.0.set_state(ChefAnim::Explode);
-        flying_chef.1.vel *= 0.2;
+        flying_chef.1.vel *= 0.05;
         commands.spawn(SoundEffect::Death);
     }
 }

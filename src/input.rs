@@ -24,11 +24,11 @@ impl ButtInput {
         self.pressed.clear();
         for kind in ButtKind::all() {
             let pressed = match kind {
-                ButtKind::A => keyboad.pressed(KeyCode::Space) || mouse.pressed(MouseButton::Right),
+                ButtKind::A => keyboad.pressed(KeyCode::Space) || mouse.pressed(MouseButton::Left),
             };
             let just_pressed = match kind {
                 ButtKind::A => {
-                    keyboad.just_pressed(KeyCode::Space) || mouse.just_pressed(MouseButton::Right)
+                    keyboad.just_pressed(KeyCode::Space) || mouse.just_pressed(MouseButton::Left)
                 }
             };
             if just_pressed {

@@ -61,12 +61,10 @@ derive_anim!(
         #[render_layers(MainStaticLayer)]
         #[offset(0.0, 7.0)]
         Sleep,
-        #[file("chefs/sleep.png")]
+        #[file("chefs/explode.png")]
         #[size(24, 24)]
         #[length(6)]
-        #[fps(5.0)]
         #[render_layers(MainStaticLayer)]
-        #[offset(0.0, 7.0)]
         #[next(Despawn)]
         Explode,
     }

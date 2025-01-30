@@ -8,8 +8,8 @@
 
 ## High prio
 
-- [ ] Spikes
-- [ ] Title screen text
+- [x] Spikes
+- [x] Title screen text
 - [ ] Make a good itch page
 - [ ] Basic trailer
 

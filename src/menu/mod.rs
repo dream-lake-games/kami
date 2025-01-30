@@ -169,6 +169,7 @@ pub struct EguiImageHandles {
     pub tier_2_empty: Handle<Image>,
     pub tier_3_full: Handle<Image>,
     pub tier_3_empty: Handle<Image>,
+    pub title: Handle<Image>,
 }
 impl FromWorld for EguiImageHandles {
     fn from_world(world: &mut World) -> Self {
@@ -180,6 +181,7 @@ impl FromWorld for EguiImageHandles {
             tier_2_empty: ass.load("menu/tier_2_empty.png"),
             tier_3_full: ass.load("menu/tier_3.png"),
             tier_3_empty: ass.load("menu/tier_3_empty.png"),
+            title: ass.load("menu/title.png"),
         }
     }
 }
@@ -191,6 +193,7 @@ pub struct EguiTextures {
     pub tier_2_empty: egui::TextureId,
     pub tier_3_full: egui::TextureId,
     pub tier_3_empty: egui::TextureId,
+    pub title: egui::TextureId,
 }
 
 pub fn control_butt_size() -> [f32; 2] {
@@ -260,6 +263,7 @@ pub fn handle_egui_images(
         egui_textures.tier_3_empty =
             contexts.add_image(egui_image_handles.tier_3_empty.clone_weak());
         egui_textures.tier_3_full = contexts.add_image(egui_image_handles.tier_3_full.clone_weak());
+        egui_textures.title = contexts.add_image(egui_image_handles.title.clone_weak());
     }
 }
 
@@ -315,7 +319,12 @@ pub fn menu_ui(
             match menu_state.kind {
                 MenuKind::Title => {
                     ui.vertical_centered(|ui| {
-                        ui.add_space(screen_size.y / 2.0);
+                        let scale_up_title = 3.5;
+                        ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
+                            egui_textures.title,
+                            [128.0 * scale_up_title, 96.0 * scale_up_title],
+                        )));
+                        ui.add_space((screen_size.y / 2.0 - 96.0 * scale_up_title).max(0.0));
                         if ui
                             .add_sized(control_butt_size(), egui::Button::new("PLAY"))
                             .clicked()

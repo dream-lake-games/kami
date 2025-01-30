@@ -45,7 +45,7 @@ struct SpikesBundle {
 impl MyLdtkIntCellValue for SpikesBundle {
     type Root = LevelPlatformRoot;
     fn from_ldtk(pos: Pos, _value: i32) -> Self {
-        let hbox = HBox::new(5, 5);
+        let hbox = HBox::new(4, 4);
         Self {
             name: Name::new("Spikes"),
             pos,
