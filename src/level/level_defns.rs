@@ -65,7 +65,10 @@ lazy_static::lazy_static! {
         LevelDefn::new(
             "SOFT LANDING",
             "c9db07a0-c210-11ef-a5df-9b2d1b25ffd8",
-            vec![],
+            vec![
+                LevelIntroMessage::new("WHISPERS", "You've heard rumors of a plot to install a new regime."),
+                LevelIntroMessage::new("WHISPERS", "Pay no attention. The mission must succeed."),
+            ],
             LevelTierCutoff::new(400, 650, 900),
         ),
         LevelDefn::new(
@@ -91,45 +94,11 @@ lazy_static::lazy_static! {
         LevelDefn::new(
             "DAREDEVIL",
             "d148e2a0-c210-11ef-a5df-3114ad4182c0",
-            vec![],
+            vec![
+                LevelIntroMessage::new("CAN'T YOU TASTE IT", "The mission is almost complete. Lock in."),
+                LevelIntroMessage::new("CAN'T YOU TASTE IT", "Tastes good, doesn't it?"),
+            ],
             LevelTierCutoff::new(150, 250, 350),
-        ),
-        // THIRD ROW OF SIX
-        LevelDefn::new(
-            "DAREDEVIL",
-            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
-            vec![],
-            LevelTierCutoff::new(0, 100, 200),
-        ),
-        LevelDefn::new(
-            "DAREDEVIL",
-            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
-            vec![],
-            LevelTierCutoff::new(0, 100, 200),
-        ),
-        LevelDefn::new(
-            "DAREDEVIL",
-            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
-            vec![],
-            LevelTierCutoff::new(0, 100, 200),
-        ),
-        LevelDefn::new(
-            "DAREDEVIL",
-            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
-            vec![],
-            LevelTierCutoff::new(0, 100, 200),
-        ),
-        LevelDefn::new(
-            "DAREDEVIL",
-            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
-            vec![],
-            LevelTierCutoff::new(0, 100, 200),
-        ),
-        LevelDefn::new(
-            "DAREDEVIL",
-            "d148e2a0-c210-11ef-a5df-3114ad4182c0",
-            vec![],
-            LevelTierCutoff::new(0, 100, 200),
         ),
     ];
 }

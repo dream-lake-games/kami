@@ -12,6 +12,7 @@ pub enum MenuKind {
     Levels,
     Controls,
     Settings,
+    PostGame,
 }
 
 fn setup_egui_visuals(mut contexts: EguiContexts) {
@@ -267,6 +268,9 @@ pub fn handle_egui_images(
     }
 }
 
+#[derive(Resource)]
+pub struct PostGameMessages(pub Vec<(String, String)>);
+
 pub fn menu_ui(
     mut contexts: EguiContexts,
     mut menu_state: ResMut<MenuState>,
@@ -276,6 +280,7 @@ pub fn menu_ui(
     mut store: ResMut<PkvStore>,
     egui_textures: Res<EguiTextures>,
     mut settings: ResMut<Pers<Settings>>,
+    mut post_game_messages: ResMut<PostGameMessages>,
 ) {
     if loading_anim
         .iter()
@@ -312,8 +317,14 @@ pub fn menu_ui(
         sd.save(st);
     };
 
+    let frameish = if menu_state.kind == MenuKind::PostGame {
+        egui::Frame::none().fill(EGC8)
+    } else {
+        egui::Frame::none()
+    };
+
     egui::CentralPanel::default()
-        .frame(egui::Frame::none())
+        .frame(frameish)
         .show(ctx, |ui| {
             let screen_size = ctx.available_rect().size();
             match menu_state.kind {
@@ -568,6 +579,33 @@ pub fn menu_ui(
                         }
                     });
                 }
+                MenuKind::PostGame => {
+                    if post_game_messages.0.is_empty() {
+                        menu_state.kind = MenuKind::Title;
+                        return;
+                    }
+                    let (title, content) = post_game_messages.0[0].clone();
+                    let force_width = 500.0;
+                    ui.style_mut().visuals.override_text_color = Some(EGC1);
+                    let fh = ui.available_height() / 4.0;
+                    ui.add_space(fh);
+                    ui.vertical_centered(|ui| {
+                        ui.set_min_width(force_width);
+                        ui.set_max_width(force_width);
+                        ui.set_min_height(fh * 2.0);
+                        ui.set_max_height(fh * 2.0);
+                        ui.style_mut().visuals.override_text_color = Some(EGC1);
+                        ui.heading(&title);
+                        ui.label(&content);
+                    });
+                    ui.vertical_centered(|ui| {
+                        ui.style_mut().visuals.override_text_color = Some(EGC8);
+                        if ui.button("CONTINUE").clicked() {
+                            commands.spawn(SoundEffect::MenuClick);
+                            post_game_messages.0.remove(0);
+                        }
+                    });
+                }
             }
         });
 }
@@ -584,6 +622,7 @@ impl Plugin for MenuPlugin {
         app.insert_resource(MenuState::default());
         app.init_resource::<EguiImageHandles>();
         app.insert_resource(EguiTextures::default());
+        app.insert_resource(PostGameMessages(vec![]));
         app.add_systems(Startup, setup_egui_visuals);
 
         app.add_systems(Update, egui_always_helpers);

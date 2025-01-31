@@ -72,6 +72,7 @@ fn handle_next_level(
     _trigger: Trigger<NextLevel>,
     mut commands: Commands,
     level_state: Res<LevelState>,
+    mut post_game_messages: ResMut<PostGameMessages>,
 ) {
     let ix = LEVEL_DEFNS
         .iter()
@@ -80,7 +81,44 @@ fn handle_next_level(
     if ix + 1 < LEVEL_DEFNS.len() {
         commands.trigger(LoadLevel::lid(LEVEL_DEFNS[ix + 1].lid.clone()));
     } else {
-        commands.trigger(LoadMenu::kind(MenuKind::Levels));
+        *post_game_messages = PostGameMessages(vec![
+            (
+                "MISSION SUCCESS".to_string(),
+                "It worked! The forest is none the wiser. The sleeper agents have been planted."
+                    .to_string(),
+            ),
+            (
+                "MISSION SUCCESS".to_string(),
+                "Once the presence of these bombs is revealed, no one will dare question the squirrel regime."
+                    .to_string(),
+            ),
+            (
+                "GLORY UPON YOU".to_string(),
+                "You are the weapon."
+                    .to_string(),
+            ),
+            (
+                "CREDITS".to_string(),
+                "Design, programming, visual art by DREAM LAKE GAMES."
+                    .to_string(),
+            ),
+            (
+                "CREDITS".to_string(),
+                "Sound effects from CC0, by Juhani Junkala."
+                    .to_string(),
+            ),
+            (
+                "CREDITS".to_string(),
+                "Music, 'A Bag of Chips' (also CC0) by Zane Little."
+                    .to_string(),
+            ),
+            (
+                "CREDITS".to_string(),
+                "Thank YOU for playing!"
+                    .to_string(),
+            ),
+        ]);
+        commands.trigger(LoadMenu::kind(MenuKind::PostGame));
     }
 }
 

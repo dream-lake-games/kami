@@ -828,7 +828,7 @@ fn handle_restart(
     level_state: Res<LevelState>,
 ) {
     if keyboard.just_pressed(KeyCode::KeyR) {
-        commands.trigger(LoadLevel::lid(level_state.lid.clone()));
+        commands.trigger(LoadLevel::lid(level_state.lid.clone()).with_skip_intro_messages(true));
     }
 }
 

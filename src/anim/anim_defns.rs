@@ -216,8 +216,10 @@ derive_anim!(
 impl LightAnim for Light128Anim {
     fn light_radius(&self) -> Option<f32> {
         match self {
-            Self::None => None,
-            _ => Some(64.0),
+            // Self::None => None,
+            // _ => Some(64.0),
+            // Sad, but I'd rather have the game run fast then have cool lighting
+            _ => None,
         }
     }
 }

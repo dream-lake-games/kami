@@ -21,7 +21,7 @@ impl Default for Framepace {
             #[cfg(debug_assertions)]
             fps_limit: 40.0,
             #[cfg(not(debug_assertions))]
-            fps_limit: 80.0,
+            fps_limit: 60.0,
             active: true,
             // active: false,
         }

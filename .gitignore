@@ -5,3 +5,5 @@ dist/
 assets/
 
 .DS_Store
+
+public/

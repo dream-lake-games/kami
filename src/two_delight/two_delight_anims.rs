@@ -61,7 +61,6 @@ pub(super) fn drive_anim_time_res(
     mut anim_time: ResMut<AnimTimeRes>,
     bullet_time: Res<BulletTime>,
     time: Res<Time>,
-    // TODO: paused: Res<State<PauseState>>,
 ) {
     let paused_delta = 1.0;
 
